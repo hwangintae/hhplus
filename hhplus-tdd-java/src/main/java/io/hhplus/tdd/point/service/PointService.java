@@ -11,8 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 
 @Slf4j
 @Service
@@ -21,6 +19,7 @@ public class PointService {
 
     private final UserPointRepository userPointRepository;
     private final PointHistoryRepository pointHistoryRepository;
+    private final UserLockManager userLockManager;
 
     public UserPoint getUserPoint(Long id) {
         return userPointRepository.selectById(id);
@@ -46,5 +45,9 @@ public class PointService {
         pointHistoryRepository.insert(id, amount, TransactionType.USE, System.currentTimeMillis());
 
         return sub;
+    }
+
+    public List<PointHistory> getPointHistory(Long id) {
+        return pointHistoryRepository.selectAllByUserId(id);
     }
 }

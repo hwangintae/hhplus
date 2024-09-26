@@ -1,9 +1,11 @@
 package io.hhplus.tdd.point.service;
 
+import io.hhplus.tdd.entity.PointHistory;
 import io.hhplus.tdd.entity.UserPoint;
 import io.hhplus.tdd.exception.MaxChargeException;
 import io.hhplus.tdd.exception.MinChargeException;
 import io.hhplus.tdd.exception.MinusPointException;
+import io.hhplus.tdd.point.TransactionType;
 import io.hhplus.tdd.point.repository.PointHistoryRepository;
 import io.hhplus.tdd.point.repository.UserPointRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -13,7 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.concurrent.locks.Lock;
+import java.util.List;
+import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -32,12 +35,6 @@ class PointServiceTest {
 
     @Mock
     private PointHistoryRepository pointHistoryRepository;
-
-    @Mock
-    private UserLockManager userLockManager;
-
-    @Mock
-    private Lock lock;
 
     @Test
     @DisplayName("사용자 id를 입력했을 때 포인트가 있는 사용자는 현재 보유 포인트가 출력된다.")
@@ -142,5 +139,43 @@ class PointServiceTest {
         assertThatThrownBy(() -> pointService.use(userId, 50_000_000L))
                 .isInstanceOf(MinusPointException.class)
                 .hasMessage("잔액이 모자랍니다.");
+    }
+
+    @Test
+    @DisplayName("포인트 충전, 사용 이력이 있는 사용자의 경우 이력이 출력된다.")
+    void getPointHistory() {
+        // given
+        long userId = 93L;
+
+        List<PointHistory> pointHistories = LongStream.rangeClosed(1, 7)
+                .mapToObj(cursor -> new PointHistory(cursor,
+                        userId,
+                        50_000L,
+                        TransactionType.CHARGE,
+                        System.currentTimeMillis()))
+                .toList();
+
+        given(pointHistoryRepository.selectAllByUserId(userId)).willReturn(pointHistories);
+
+        // when
+        List<PointHistory> pointHistory = pointService.getPointHistory(userId);
+
+        // then
+        assertThat(pointHistory).isEqualTo(pointHistories);
+    }
+
+    @Test
+    @DisplayName("포인트를 충전하거나 사용한 적이 없는 사용자는 empty List 가 출력된다.")
+    void getEmptyPointHistory() {
+        // given
+        long userId = 99L;
+
+        given(pointHistoryRepository.selectAllByUserId(any(Long.class))).willReturn(List.of());
+
+        // when
+        List<PointHistory> pointHistory = pointService.getPointHistory(userId);
+
+        // then
+        assertThat(pointHistory).isEmpty();
     }
 }
