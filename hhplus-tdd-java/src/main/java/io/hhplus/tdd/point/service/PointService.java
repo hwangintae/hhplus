@@ -1,6 +1,5 @@
 package io.hhplus.tdd.point.service;
 
-
 import io.hhplus.tdd.entity.PointHistory;
 import io.hhplus.tdd.entity.UserPoint;
 import io.hhplus.tdd.point.TransactionType;
@@ -11,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 @Slf4j
 @Service
@@ -26,25 +27,61 @@ public class PointService {
     }
 
     public UserPoint charge(Long id, long amount) {
-        UserPoint userPoint = getUserPoint(id);
 
-        UserPoint add = userPoint.add(amount);
+        Lock lock = userLockManager.getUserLock(id);
+        boolean acquired = false;
+        try {
+            acquired = lock.tryLock(5L, TimeUnit.SECONDS);
+            if(!acquired) {
+                log.error("사용자 락 획특 타임아웃");
+                throw new IllegalArgumentException("사용자 락 획득 타임아웃");
+            }
 
-        userPointRepository.insertOrUpdate(add.id(), add.point());
-        pointHistoryRepository.insert(id, amount, TransactionType.CHARGE, System.currentTimeMillis());
+            UserPoint userPoint = getUserPoint(id);
 
-        return add;
+            UserPoint add = userPoint.add(amount);
+
+            userPointRepository.insertOrUpdate(add.id(), add.point());
+            pointHistoryRepository.insert(id, amount, TransactionType.CHARGE, System.currentTimeMillis());
+
+            return add;
+        } catch (InterruptedException e) {
+            log.error("사용자 락 획특 오류");
+            throw new IllegalArgumentException("사용자 락 획득 오류");
+        } finally {
+            if (acquired) {
+                lock.unlock();
+            }
+        }
     }
 
     public UserPoint use(Long id, long amount) {
-        UserPoint userPoint = getUserPoint(id);
 
-        UserPoint sub = userPoint.sub(amount);
+        Lock lock = userLockManager.getUserLock(id);
 
-        userPointRepository.insertOrUpdate(sub.id(), sub.point());
-        pointHistoryRepository.insert(id, amount, TransactionType.USE, System.currentTimeMillis());
+        boolean acquired = false;
+        try {
+            acquired = lock.tryLock(5L, TimeUnit.SECONDS);
+            if(!acquired) {
+                log.error("사용자 락 획특 타임아웃");
+                throw new IllegalArgumentException("사용자 락 획득 타임아웃");
+            }
+            UserPoint userPoint = getUserPoint(id);
 
-        return sub;
+            UserPoint sub = userPoint.sub(amount);
+
+            userPointRepository.insertOrUpdate(sub.id(), sub.point());
+            pointHistoryRepository.insert(id, amount, TransactionType.USE, System.currentTimeMillis());
+
+            return sub;
+        } catch (InterruptedException e) {
+            log.error("사용자 락 획특 오류");
+            throw new IllegalArgumentException("사용자 락 획득 오류");
+        } finally {
+            if (acquired) {
+                lock.unlock();
+            }
+        }
     }
 
     public List<PointHistory> getPointHistory(Long id) {

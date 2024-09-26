@@ -16,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +37,12 @@ class PointServiceTest {
 
     @Mock
     private PointHistoryRepository pointHistoryRepository;
+
+    @Mock
+    private UserLockManager userLockManager;
+
+    @Mock
+    private Lock lock;
 
     @Test
     @DisplayName("사용자 id를 입력했을 때 포인트가 있는 사용자는 현재 보유 포인트가 출력된다.")
@@ -58,6 +66,7 @@ class PointServiceTest {
     @DisplayName("포인트를 충전하면 충전 금액 만큼 충전된다.")
     void charge() {
         // given
+        givenUserLock();
         long userId = 100L;
 
         UserPoint currentPoint = new UserPoint(userId, 1_000L, System.currentTimeMillis());
@@ -80,6 +89,8 @@ class PointServiceTest {
     @DisplayName("포인트를 사용하면 사용 금액 만큼 차감된다.")
     void use() {
         // given
+        givenUserLock();
+
         long userId = 100L;
 
         UserPoint currentPoint = new UserPoint(userId, 1_000L, System.currentTimeMillis());
@@ -102,6 +113,8 @@ class PointServiceTest {
     @DisplayName("포인트를 충전할 때, 최대 금액 50_000_000L을 넘어가면 MaxChargeException 이 발생한다.")
     void maxChargeException() {
         // given
+        givenUserLock();
+
         long userId = 77L;
         given(userPointRepository.selectById(any(Long.class))).willReturn(new UserPoint(userId, 800L, System.currentTimeMillis()));
 
@@ -115,6 +128,8 @@ class PointServiceTest {
     @DisplayName("포인트를 충전할 때, 0 이하의 포인트를 충전하면 MinChargeException 이 발생한다.")
     void minChargeException() {
         // given
+        givenUserLock();
+
         long userId = 77L;
         given(userPointRepository.selectById(any(Long.class))).willReturn(new UserPoint(userId, 800L, System.currentTimeMillis()));
 
@@ -132,6 +147,8 @@ class PointServiceTest {
     @DisplayName("충전된 금액보다 더 많은 포인트를 사용하면 MinusPointException이 발생한다.")
     void minusPointException() {
         // given
+        givenUserLock();
+
         long userId = 18L;
         given(userPointRepository.selectById(any(Long.class))).willReturn(new UserPoint(userId, 800L, System.currentTimeMillis()));
 
@@ -177,5 +194,14 @@ class PointServiceTest {
 
         // then
         assertThat(pointHistory).isEmpty();
+    }
+
+    // mocking lock 을 추가하면 안되는 테스트가 있어 따로 뺐음
+    private void givenUserLock() {
+        given(userLockManager.getUserLock(any(Long.class))).willReturn(lock);
+        // Mock the lock to simulate successful lock acquisition
+        try {
+            given(lock.tryLock(any(Long.class), any(TimeUnit.class))).willReturn(true);
+        } catch (Exception ignore) {}
     }
 }
