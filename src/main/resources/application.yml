@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: SpecialLecture
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+        hibernate:
+          format-sql: true
+          use-sql-comments: true
+          generate-statistics: true
+  datasource:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/db_lecture_srv
+      username: us_hhplus_lecture
+      password: lecture!#24
+
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: INFO
+        type:
+          descriptor: TRACE
