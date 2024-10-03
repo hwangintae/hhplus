@@ -133,6 +133,26 @@ class LectureServiceTest {
                 );
     }
 
+    @Test
+    @DisplayName("강의는 최대 30명 까지 수용할 수 있으며, 30명 초과시 LectureEnrollmentException 가 발생한다.")
+    public void overLectureEnrollment() {
+        // given
+        Long studentId = 28L;
+        Long lectureId = 88L;
+
+        given(lectureRepository.getLecture(anyLong())).willReturn(LectureDomain.builder()
+                .maxCapacity(30)
+                .build());
+        given(currentLectureCapacityRepository.getCurrentLectureCapacityDomain(anyLong()))
+                .willReturn(CurrentLectureCapacityDomain.builder()
+                        .currentCapacity(30)
+                        .build());
+
+        // when // then
+        assertThatThrownBy(() -> lectureService.enrollLecture(studentId, lectureId))
+                .isInstanceOf(LectureEnrollmentException.class)
+                .hasMessage("해당 강좌는 정원이 초과되어 더 이상 신청할 수 없습니다.");
+    }
 
     @Test
     @DisplayName("수강 신청 기간인 강의의 목록을 출력한다.")

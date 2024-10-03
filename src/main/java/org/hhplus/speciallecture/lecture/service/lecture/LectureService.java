@@ -101,17 +101,26 @@ public class LectureService {
 
     @Transactional(rollbackFor = Exception.class)
     public void enrollLecture(Long studentId, Long lectureId) {
+        LectureDomain lectureDomain = lectureRepository.getLecture(lectureId);
         CurrentLectureCapacityDomain currentLectureCapacityDomain = currentLectureCapacityRepository
                 .getCurrentLectureCapacityDomain(lectureId);
 
-        lectureEnrollmentRepository.save(LectureEnrollmentDomain.builder()
-                .studentId(studentId)
-                .lectureId(lectureId)
-                .deleteAt(false)
-                .build());
+        int maxCapacity = lectureDomain.getMaxCapacity();
+        int currentCapacity = currentLectureCapacityDomain.getCurrentCapacity();
 
-        currentLectureCapacityDomain.add();
-        currentLectureCapacityRepository.changeCurrentCapacity(currentLectureCapacityDomain);
+        // 강의 수용인원 확인
+        if (maxCapacity <= currentCapacity) {
+            throw new LectureEnrollmentException();
+        } else {
+            lectureEnrollmentRepository.save(LectureEnrollmentDomain.builder()
+                    .studentId(studentId)
+                    .lectureId(lectureId)
+                    .deleteAt(false)
+                    .build());
+
+            currentLectureCapacityDomain.add();
+            currentLectureCapacityRepository.changeCurrentCapacity(currentLectureCapacityDomain);
+        }
     }
 
     // 비관적 락 테스트를 위해 사용
