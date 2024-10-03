@@ -1,11 +1,13 @@
 package org.hhplus.speciallecture.lecture.service;
 
+import org.hhplus.speciallecture.common.exception.DuplicatedEnrollmentException;
 import org.hhplus.speciallecture.common.exception.LectureEnrollmentException;
 import org.hhplus.speciallecture.common.exception.LectureTimeOverlapsException;
 import org.hhplus.speciallecture.lecture.domain.currentLectureCapacity.CurrentLectureCapacityDomain;
 import org.hhplus.speciallecture.lecture.domain.currentLectureCapacity.CurrentLectureCapacityRepository;
 import org.hhplus.speciallecture.lecture.domain.lecture.LectureDomain;
 import org.hhplus.speciallecture.lecture.domain.lecture.LectureRepository;
+import org.hhplus.speciallecture.lecture.domain.lectureEnrollment.LectureEnrollmentDomain;
 import org.hhplus.speciallecture.lecture.domain.lectureEnrollment.LectureEnrollmentRepository;
 import org.hhplus.speciallecture.lecture.service.lecture.LectureService;
 import org.hhplus.speciallecture.lecture.service.lecture.response.LectureServiceResponse;
@@ -134,6 +136,31 @@ class LectureServiceTest {
     }
 
     @Test
+    @DisplayName("이미 신청한 강의는 중복해서 신청할 수 없으며 중복 신청 시 DuplicatedEnrollmentException 이 발생한다.")
+    public void duplicatedEnrollment() {
+        // given
+        Long studentId = 28L;
+        Long lectureId = 88L;
+
+        given(lectureRepository.getLecture(anyLong())).willReturn(LectureDomain.builder().build());
+        given(currentLectureCapacityRepository.getCurrentLectureCapacityDomain(anyLong()))
+                .willReturn(CurrentLectureCapacityDomain.builder().build());
+        given(lectureEnrollmentRepository.getLectureEnrollmentDomainByStudentId(anyLong()))
+                .willReturn(List.of(LectureEnrollmentDomain.builder()
+                        .id(9999L)
+                        .lectureId(lectureId)
+                        .studentId(studentId)
+                        .deleteAt(false)
+                        .build())
+                );
+
+        // when // then
+        assertThatThrownBy(() -> lectureService.enrollLecture(studentId, lectureId))
+                .isInstanceOf(DuplicatedEnrollmentException.class)
+                .hasMessage("이미 신청한 강의 입니다.");
+    }
+
+    @Test
     @DisplayName("강의는 최대 30명 까지 수용할 수 있으며, 30명 초과시 LectureEnrollmentException 가 발생한다.")
     public void overLectureEnrollment() {
         // given
@@ -147,6 +174,14 @@ class LectureServiceTest {
                 .willReturn(CurrentLectureCapacityDomain.builder()
                         .currentCapacity(30)
                         .build());
+        given(lectureEnrollmentRepository.getLectureEnrollmentDomainByStudentId(anyLong()))
+                .willReturn(List.of(LectureEnrollmentDomain.builder()
+                        .id(9999L)
+                        .lectureId(99L)
+                        .studentId(studentId)
+                        .deleteAt(false)
+                        .build())
+                );
 
         // when // then
         assertThatThrownBy(() -> lectureService.enrollLecture(studentId, lectureId))
