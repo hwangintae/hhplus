@@ -1,6 +1,7 @@
 package org.hhplus.speciallecture.lecture.service;
 
 import org.assertj.core.api.Assertions;
+import org.hhplus.speciallecture.common.exception.DuplicatedEnrollmentException;
 import org.hhplus.speciallecture.common.exception.LectureEnrollmentException;
 import org.hhplus.speciallecture.common.exception.LectureTimeOverlapsException;
 import org.hhplus.speciallecture.lecture.controller.LectureController;
@@ -134,6 +135,33 @@ class LectureServiceIntegrationTest {
     }
 
     @Test
+    @DisplayName("이미 신청한 강의는 중복해서 신청할 수 없으며 중복 신청 시 DuplicatedEnrollmentException 이 발생한다.")
+    public void duplicatedEnrollment() {
+        // given
+        Long studentId = 28L;
+
+        LocalDateTime now = LocalDateTime.now();
+        LectureDomain lectureDomain = LectureDomain.builder()
+                .coachId(111L)
+                .title("test")
+                .lectureStartDateTime(now.plusHours(1))
+                .lectureEndDateTime(now.plusHours(2))
+                .maxCapacity(30)
+                .build();
+
+        LectureDomain save = lectureService.save(lectureDomain);
+
+        Long lectureId = save.getId();
+
+        lectureService.enrollLecture(studentId, lectureId);
+
+        // when // then
+        assertThatThrownBy(() -> lectureService.enrollLecture(studentId, lectureId))
+                .isInstanceOf(DuplicatedEnrollmentException.class)
+                .hasMessage("이미 신청한 강의 입니다.");
+    }
+
+    @Test
     @DisplayName("강의는 최대 30명 까지 수용할 수 있으며, 30명 초과시 LectureEnrollmentException 가 발생한다.")
     public void overLectureEnrollment() {
         // given
@@ -240,6 +268,40 @@ class LectureServiceIntegrationTest {
         CurrentLectureCapacityDomain capacityDomain = lectureService.getCurrnentLectureCapacity(lectureId);
         assertThat(capacityDomain.getCurrentCapacity()).isEqualTo(30);
         assertThat(exceptionCount.get()).isEqualTo(10);
+    }
+
+    @Test
+    @DisplayName("한사람이 동시에 5번 수강신청 했을 때, 1번만 수강신청 되는지 동시성 테스트")
+    public void concurrencySame5() {
+        // given
+        Long studentId = 6433L;
+
+        LectureDomain lectureDomain = LectureDomain.builder()
+                .maxCapacity(30)
+                .build();
+
+        LectureDomain save = lectureService.save(lectureDomain);
+
+        Long lectureId = save.getId();
+
+        // when
+        AtomicInteger exceptionCount = new AtomicInteger();
+        CompletableFuture.allOf(
+                LongStream.rangeClosed(1, 5)
+                        .mapToObj(idx -> CompletableFuture.runAsync(() -> {
+                            try {
+                                lectureService.enrollLecture(studentId, lectureId);
+                            } catch (DuplicatedEnrollmentException e) {
+                                exceptionCount.getAndIncrement();
+                            }
+                        }))
+                        .toArray(CompletableFuture[]::new)
+        ).join();
+
+        // then
+        CurrentLectureCapacityDomain capacityDomain = lectureService.getCurrnentLectureCapacity(lectureId);
+        assertThat(capacityDomain.getCurrentCapacity()).isEqualTo(1);
+        assertThat(exceptionCount.get()).isEqualTo(4);
     }
 
 }

@@ -105,6 +105,18 @@ public class LectureService {
         CurrentLectureCapacityDomain currentLectureCapacityDomain = currentLectureCapacityRepository
                 .getCurrentLectureCapacityDomain(lectureId);
 
+        List<LectureEnrollmentDomain> LectureEnrollmentDomains = lectureEnrollmentRepository.getLectureEnrollmentDomainByStudentId(studentId);
+
+        List<LectureEnrollmentDomain> duplicatedEnrollment = LectureEnrollmentDomains.stream()
+                .filter(lectureEnrollmentDomain -> !lectureEnrollmentDomain.isDeleteAt())
+                .filter(lectureEnrollmentDomain -> Objects.equals(lectureEnrollmentDomain.getLectureId(), lectureId))
+                .toList();
+
+        // 이미 신청한 강의 확인
+        if (!duplicatedEnrollment.isEmpty()) {
+            throw new DuplicatedEnrollmentException();
+        }
+
         int maxCapacity = lectureDomain.getMaxCapacity();
         int currentCapacity = currentLectureCapacityDomain.getCurrentCapacity();
 
