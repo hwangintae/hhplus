@@ -14,7 +14,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 public abstract class RestDocsSupport {
 
     protected MockMvc mockMvc;
-    protected ObjectMapper objectMapper;
+    protected ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp(RestDocumentationContextProvider provider) {

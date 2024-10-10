@@ -1,0 +1,12 @@
+### 잔액 조회
+GET http://localhost:8080/api/cash?userId=2
+
+
+### 잔액 충전
+POST http://localhost:8080/api/cash
+Content-Type: application/json
+
+{
+  "userId": "2",
+  "amount": "1000"
+}

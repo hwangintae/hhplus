@@ -1,14 +1,14 @@
-package org.hhplus.ecommerce.docs.point;
+package org.hhplus.ecommerce.docs.cart;
 
-import org.hhplus.ecommerce.docs.ApiDocsUtil;
+import org.hhplus.ecommerce.cart.controller.CartController;
+import org.hhplus.ecommerce.cash.controller.CashController;
 import org.hhplus.ecommerce.docs.RestDocsSupport;
-import org.hhplus.ecommerce.point.controller.PointController;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.payload.JsonFieldType;
-import org.springframework.restdocs.request.RequestDocumentation;
 
-import static org.hhplus.ecommerce.docs.ApiDocsUtil.*;
+import static org.hhplus.ecommerce.docs.ApiDocsUtil.getDocumentRequest;
+import static org.hhplus.ecommerce.docs.ApiDocsUtil.getDocumentResponse;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -18,34 +18,35 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class PointControllerDocsTest extends RestDocsSupport {
+public class CartControllerDocsTest extends RestDocsSupport {
 
     @Override
     protected Object initController() {
-        return new PointController();
+        return new CartController();
     }
 
     @Test
-    @DisplayName("rest docs 잘 되는지 테스트")
-    public void testPingPong() throws Exception {
+    @DisplayName("장바구니 목록 조회")
+    public void getCart() throws Exception {
         // given
 
         // expected
-        mockMvc.perform(get("/api/point/ping")
-                        .param("text", "hello"))
+        mockMvc.perform(get("/api/cart")
+                        .param("userId", "2"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("point-ping",
+                .andDo(document("cart-get",
                         getDocumentRequest(),
                         getDocumentResponse(),
                         queryParameters(
-                                parameterWithName("text").description("텍스트")
+                                parameterWithName("userId").description("사용자 ID")
                         ),
                         responseFields(
                                 fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
-                                fieldWithPath("httpStatus").type(JsonFieldType.STRING).description("결과 상태"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메시지"),
-                                fieldWithPath("data").type(JsonFieldType.STRING).description("data")
+                                fieldWithPath("data[].itemName").type(JsonFieldType.STRING).description("상품 명"),
+                                fieldWithPath("data[].itemCnt").type(JsonFieldType.NUMBER).description("상품 개수"),
+                                fieldWithPath("data[].status").type(JsonFieldType.STRING).description("재고 여부")
                         )
                 ));
     }

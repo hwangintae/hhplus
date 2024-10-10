@@ -1,0 +1,20 @@
+[[잔액]]
+
+=== 잔액 조회
+==== Request
+include::{snippets}/cash-get/curl-request.adoc[]
+include::{snippets}/cash-get/http-request.adoc[]
+
+==== Response
+include::{snippets}/cash-get/response-fields.adoc[]
+include::{snippets}/cash-get/http-response.adoc[]
+
+
+=== 잔액 충전
+==== Request
+include::{snippets}/cash-add/curl-request.adoc[]
+include::{snippets}/cash-add/http-request.adoc[]
+
+==== Response
+include::{snippets}/cash-add/response-fields.adoc[]
+include::{snippets}/cash-add/http-response.adoc[]

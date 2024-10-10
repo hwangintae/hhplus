@@ -1,0 +1,16 @@
+### 잔액 충전
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+
+{
+  "orderRequests": [
+    {
+      "userId": 1,
+      "itemId": 22,
+      "cnt": 33
+    }
+  ]
+}
+
+### 주문 목록 조회
+GET http://localhost:8080/api/orders?userId=2
