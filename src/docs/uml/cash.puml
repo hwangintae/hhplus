@@ -1,0 +1,30 @@
+
+@startuml
+
+hide footbox
+autoactivate on
+
+actor "인증된 회원" as c
+participant "잔액" as cash
+Database "잔액" as cd
+
+group 잔액 조회
+    c -> cash: GET /api/cash
+    cash -> cd: 잔액 정보 조회
+    cash <-- cd: 잔액 정보
+    c <-- cash: 잔액 결과
+end
+
+group 잔액 충전
+    c -> cash: POST /api/cash
+    alt 최대 충전 금액 < 충전 금액
+        c <-- cash: 최대 충전 금액 초과
+    else
+        cash -> cd: 잔액 충전
+        cash <-- cd: 잔액 충전 결과
+        c <-- cash: 잔액 충전 결과
+    end alt
+end
+
+
+@enduml
