@@ -1,0 +1,20 @@
+
+@startuml
+
+hide footbox
+autoactivate on
+
+actor "인증된 회원" as c
+participant "상품" as product
+database "상품" as pd
+participant "재고" as stock
+
+c -> product: GET /api/product
+product -> pd: 상품 정보 조회
+product <-- pd: 상품 정보
+product -> stock: 재고 조회
+product <-- stock: 재고 결과
+c <-- product: 상품 결과
+
+
+@enduml

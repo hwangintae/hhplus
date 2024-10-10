@@ -1,4 +1,62 @@
-## API Specs
+# 🏆 lecture_3 주제 : e-commerce
+
+## 1. milestone 작성
+> - 이번 발제는 3주동안 진행 됩니다. 따라서 simple 하게 설계, 구현, 고도화 3개로 milestone 을 추가했습니다.
+> - github 에 milestone 을 등록할 수 있어서 link 를 첨부하였습니다.
+> - https://github.com/hwangintae/hhplus/milestones
+
+### milestone 1. lecture_3 설계
+1. milestone 작성하기
+2. 요구사항 분석하기
+3. sequence diagram 작성하기
+4. 개발환경 준비
+5. erd 설계하기
+6. API 명세 및 Mock API 작성
+
+### milestone 2. lecture_3 구현
+1. 잔액 충전 / 조회 API 개발 및 단위 테스트
+2. 상품 조회 API 개발 및 단위 테스트
+3. 주문 / 결제 API 개발 및 단위 테스트
+4. 상위 상품 조회 API 개발 및 단위 테스트
+5. 장바구니 기능 개발 및 단위 테스트
+
+### milestone 2. lecture_3 고도화
+1. 잔액 충전 / 조회 API 고도화
+2. 상품 조회 API 고도화
+3. 주문 / 결제 API 고도화
+4. 상위 상품 조회 API 고도화
+5. 장바구니 기능 고도화
+
+
+## 2. e-커머스 요구사항 분석 (sequence diagram)
+1. 사용자는 잔액을 조회할 수 있고, 충전할 수 있다.
+2. 상품 정보를 조회 시, 상품의 정보와 재고를 출력한다.
+3. 상품 주문 결제 성공 시, 잔액이 차감 되어야 하며 데이터 분석을 위해 외부 플랫폼에 결과를 전송한다.
+### 예상되는 문제
+1. 충전과 재고 조회에서 동시성 문제가 발생할 수 있다.
+2. 외부 플랫폼에 영향을 받지 않아야 한다. 외부 플랫폼이 정상 작동 하지 않을 경우를 대비 해야한다.
+
+### sequence diagram
+#### **`잔액 조회, 충전`**
+  - ![cash](https://github.com/user-attachments/assets/404ce1f4-2c5d-4d20-9090-b81aeece05f6)
+#### **`상품 조회`**
+  - ![item](https://github.com/user-attachments/assets/37ad5f02-c099-4eec-95ab-9f1d1b3cb778)
+#### **`상품 주문 및 결제`**
+  - ![orderAndPay](https://github.com/user-attachments/assets/8120169a-9e11-4848-9816-2dea1155a54e)
+
+## 3. ERD 설계 자료
+
+## 4. API 명세서 및 Mock API
+
+## 5. 프로젝트 구조
+
+
+
+
+
+
+
+## 99. API Specs
 
 ### 기본과제
 
@@ -41,3 +99,15 @@
 
 - [ ] 동시에 여러 주문이 들어올 경우, 유저의 보유 잔고에 대한 처리가 정확해야 합니다.
 - [ ] 각 상품의 재고 관리가 정상적으로 이루어져 잘못된 주문이 발생하지 않도록 해야 합니다.
+
+### **`STEP 05`**
+- [x] 시나리오 선정 및 프로젝트 Milestone 제출
+- [x] 시나리오 요구사항 별 분석 자료 제출
+  > 시퀀스 다이어그램, 플로우 차트 등
+- [x] 자료들을 리드미에 작성 후 PR 링크 제출
+
+### **`STEP 06`**
+
+- [ ] ERD 설계 자료 제출
+- [ ] API 명세 및 Mock API 작성
+- [ ] 자료들을 리드미에 작성 후 PR링크 제출 ( 채택할 기본 패키지 구조, 기술 스택 등 )
