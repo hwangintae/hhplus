@@ -1,0 +1,20 @@
+[[주문]]
+
+=== 주문 조회
+==== Request
+include::{snippets}/orders-get/curl-request.adoc[]
+include::{snippets}/orders-get/http-request.adoc[]
+
+==== Response
+include::{snippets}/orders-get/response-fields.adoc[]
+include::{snippets}/orders-get/http-response.adoc[]
+
+
+=== 주문
+==== Request
+include::{snippets}/orders-post/curl-request.adoc[]
+include::{snippets}/orders-post/http-request.adoc[]
+
+==== Response
+include::{snippets}/orders-post/response-fields.adoc[]
+include::{snippets}/orders-post/http-response.adoc[]

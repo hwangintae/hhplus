@@ -1,2 +1,0 @@
-### point ping pong test
-GET http://localhost:8080/api/point/ping?text=hello
