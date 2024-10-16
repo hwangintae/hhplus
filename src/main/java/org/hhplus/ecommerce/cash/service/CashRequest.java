@@ -4,17 +4,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 @Getter
 @NoArgsConstructor
-public class AddCashRequest {
+public class CashRequest {
 
     private Long userId;
-    private BigDecimal amount;
+    private long amount;
 
     @Builder
-    protected AddCashRequest(Long userId, BigDecimal amount) {
+    protected CashRequest(Long userId, long amount) {
         this.userId = userId;
         this.amount = amount;
     }

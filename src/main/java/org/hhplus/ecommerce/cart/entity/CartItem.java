@@ -1,4 +1,4 @@
-package org.hhplus.ecommerce.cartItem.entity;
+package org.hhplus.ecommerce.cart.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,4 +22,6 @@ public class CartItem {
     private Long itemId;
 
     private int cnt;
+
+    private boolean deleteAt;
 }
