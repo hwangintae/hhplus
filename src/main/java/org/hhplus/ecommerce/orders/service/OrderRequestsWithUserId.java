@@ -8,12 +8,13 @@ import java.util.List;
 
 @Getter
 @NoArgsConstructor
-public class OrderRequests {
-
+public class OrderRequestsWithUserId {
+    private Long userId;
     private List<OrderRequest> orderRequests;
 
     @Builder
-    protected OrderRequests(List<OrderRequest> orderRequests) {
+    protected OrderRequestsWithUserId(Long userId, List<OrderRequest> orderRequests) {
+        this.userId = userId;
         this.orderRequests = orderRequests;
     }
 }

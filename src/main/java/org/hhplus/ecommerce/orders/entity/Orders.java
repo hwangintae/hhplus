@@ -2,9 +2,11 @@ package org.hhplus.ecommerce.orders.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hhplus.ecommerce.orders.service.OrderStatus;
+import org.hhplus.ecommerce.orders.usecase.OrderStatus;
+import org.hhplus.ecommerce.orders.service.OrdersDomain;
 
 @Getter
 @Entity
@@ -19,4 +21,27 @@ public class Orders {
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+
+    @Builder
+    protected Orders(Long id, Long userId, OrderStatus status) {
+        this.id = id;
+        this.userId = userId;
+        this.status = status;
+    }
+
+    public static Orders of(OrdersDomain domain) {
+        return Orders.builder()
+                .id(domain.getId())
+                .userId(domain.getUserId())
+                .status(domain.getStatus())
+                .build();
+    }
+
+    public OrdersDomain toDomain() {
+        return OrdersDomain.builder()
+                .id(this.id)
+                .userId(this.userId)
+                .status(this.status)
+                .build();
+    }
 }

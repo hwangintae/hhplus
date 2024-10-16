@@ -8,13 +8,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OrderRequest {
 
-    private Long userId;
     private Long itemId;
     private int cnt;
 
     @Builder
-    protected OrderRequest(Long userId, Long itemId, int cnt) {
-        this.userId = userId;
+    protected OrderRequest(Long itemId, int cnt) {
         this.itemId = itemId;
         this.cnt = cnt;
     }
