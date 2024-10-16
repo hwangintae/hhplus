@@ -18,6 +18,4 @@ public class HashTag {
     private Long id;
 
     private String name;
-
-    private Long itemId;
 }

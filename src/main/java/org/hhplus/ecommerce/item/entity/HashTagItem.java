@@ -1,4 +1,4 @@
-package org.hhplus.ecommerce.orderItem.entity;
+package org.hhplus.ecommerce.item.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,15 +11,14 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class OrderItem {
+public class HashTagItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long orderId;
-
+    private Long hashTagId;
     private Long itemId;
 
-    private int itemCnt;
+    private boolean deleteAt;
 }

@@ -1,12 +1,18 @@
 package org.hhplus.ecommerce.item.service;
 
+import lombok.Builder;
 import lombok.Getter;
 
-import java.math.BigDecimal;
-
 @Getter
-public abstract class ItemDomain {
-    private Long id;
-    private String name;
-    private BigDecimal price;
+public class ItemDomain {
+    private final Long id;
+    private final String name;
+    private final long price;
+
+    @Builder
+    protected ItemDomain(Long id, String name, long price) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+    }
 }
