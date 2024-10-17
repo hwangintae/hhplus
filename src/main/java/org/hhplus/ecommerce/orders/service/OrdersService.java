@@ -21,6 +21,18 @@ public class OrdersService {
     private final OrderItemRepository orderItemRepository;
     private final TopOrderItemRepository topOrderItemRepository;
 
+    public List<OrderItemDomain> getOrders(Long userId) {
+        List<Orders> orders = ordersRepository.findByUserId(userId);
+
+        List<Long> ordersIds = orders.stream().map(Orders::getId).toList();
+
+        List<OrderItem> orderItems = orderItemRepository.findByOrdersIdIn(ordersIds);
+        return orderItems.stream()
+                .filter(item -> !item.isDeleteAt())
+                .map(OrderItem::toDomain)
+                .toList();
+    }
+
     @Transactional
     public List<OrderItemDomain> createOrders(Long userId, List<OrderRequest> orderRequests) {
 

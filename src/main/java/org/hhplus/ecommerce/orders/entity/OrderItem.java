@@ -26,12 +26,15 @@ public class OrderItem extends BaseEntity {
 
     private int itemCnt;
 
+    private boolean deleteAt;
+
     @Builder
-    protected OrderItem(Long id, Long ordersId, Long itemId, int itemCnt) {
+    protected OrderItem(Long id, Long ordersId, Long itemId, int itemCnt, boolean deleteAt) {
         this.id = id;
         this.ordersId = ordersId;
         this.itemId = itemId;
         this.itemCnt = itemCnt;
+        this.deleteAt = deleteAt;
     }
 
     public OrderItemDomain toDomain() {
@@ -40,6 +43,7 @@ public class OrderItem extends BaseEntity {
                 .ordersId(this.ordersId)
                 .itemId(this.itemId)
                 .itemCnt(this.itemCnt)
+                .deleteAt(this.deleteAt)
                 .build();
     }
 }

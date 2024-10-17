@@ -10,13 +10,15 @@ public class OrderItemDomain {
     private final Long ordersId;
     private final Long itemId;
     private final int itemCnt;
+    private final boolean deleteAt;
 
     @Builder
-    protected OrderItemDomain(Long id, Long ordersId, Long itemId, int itemCnt) {
+    protected OrderItemDomain(Long id, Long ordersId, Long itemId, int itemCnt, boolean deleteAt) {
         this.id = id;
         this.ordersId = ordersId;
         this.itemId = itemId;
         this.itemCnt = itemCnt;
+        this.deleteAt = deleteAt;
     }
 
     public OrderItem toEntity() {
