@@ -4,28 +4,28 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-public class ApiResponse<T> {
+public class RestApiResponse<T> {
     private int code;
     private String message;
     private T data;
 
-    public ApiResponse(int code, String message, T data) {
+    public RestApiResponse(int code, String message, T data) {
         this.code = code;
         this.message = message;
         this.data = data;
     }
 
-    public static <T> ApiResponse<T> of(int code, String message, T data) {
-        return new ApiResponse<>(code, message, data);
+    public static <T> RestApiResponse<T> of(int code, String message, T data) {
+        return new RestApiResponse<>(code, message, data);
     }
 
-    public static <T> ApiResponse<T> ok(T data) {
+    public static <T> RestApiResponse<T> ok(T data) {
         HttpStatus ok = HttpStatus.OK;
 
         return of(ok.value(), ok.name(), data);
     }
 
-    public static ApiResponse<String> error(int code, String message) {
+    public static RestApiResponse<String> error(int code, String message) {
         return of(code, message, "error");
     }
 }

@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ApiControllerAdvice {
 
     @ExceptionHandler(EcommerceException.class)
-    public ApiResponse<String> handleEcommerceException(EcommerceException e) {
+    public RestApiResponse<String> handleEcommerceException(EcommerceException e) {
 
         log.error(">>> handleEcommerceException: {}", e.getMessage());
 
-        return ApiResponse.error(e.getCode(), e.getMessage());
+        return RestApiResponse.error(e.getCode(), e.getMessage());
     }
 }
