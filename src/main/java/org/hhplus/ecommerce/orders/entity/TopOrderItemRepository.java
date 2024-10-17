@@ -6,5 +6,5 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface TopOrderItemRepository extends JpaRepository<TopOrderItem, Long> {
-    List<TopOrderItem> findByDate(LocalDate date);
+    List<TopOrderItem> findByCreateDay(LocalDate createDay);
 }
