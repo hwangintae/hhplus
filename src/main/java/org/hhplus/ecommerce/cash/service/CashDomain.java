@@ -8,6 +8,7 @@ import org.hhplus.ecommerce.common.exception.EcommerceErrors;
 
 import java.math.BigDecimal;
 
+import static org.hhplus.ecommerce.common.exception.EcommerceErrors.ILLEGAL_AMOUNT;
 import static org.hhplus.ecommerce.common.exception.EcommerceErrors.INSUFFICIENT_USER_CASH;
 
 @Getter
@@ -32,10 +33,18 @@ public class CashDomain {
     }
 
     public void add(long amount) {
+        if (amount <= 0) {
+            throw new EcommerceBadRequestException(ILLEGAL_AMOUNT);
+        }
+
         this.amount += amount;
     }
 
     public void sub(long amount) {
+        if (amount <= 0) {
+            throw new EcommerceBadRequestException(ILLEGAL_AMOUNT);
+        }
+
         if (this.amount - amount < 0) {
             throw new EcommerceBadRequestException(INSUFFICIENT_USER_CASH);
         }
