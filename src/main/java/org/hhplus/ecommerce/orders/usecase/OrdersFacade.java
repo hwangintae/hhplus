@@ -32,7 +32,7 @@ public class OrdersFacade {
         Map<Long, Integer> orderReqeustsMap = orderRequests.stream()
                 .collect(Collectors.toMap(OrderRequest::getItemId, OrderRequest::getCnt));
 
-        // 주문할 상품 id 목록
+        // 상품 id 목록
         List<Long> itemIds = orderRequests.stream()
                 .map(OrderRequest::getItemId)
                 .toList();
@@ -41,6 +41,7 @@ public class OrdersFacade {
         List<ItemDomain> itemDomains = itemService.getItems(itemIds);
 
         // 구매가 가능한 상품 목록
+        // 재고가 있는지 확인
         List<ItemDomain> notOverQuantityItemDomains = itemDomains.stream()
                 .filter(itemDomain -> {
                     Long itemId = itemDomain.getId();
@@ -49,6 +50,16 @@ public class OrdersFacade {
                     return stockService.checkStock(itemId, cnt);
                 })
                 .toList();
+
+        // 재고 차감
+        notOverQuantityItemDomains.forEach(item -> {
+                    Long itemId = item.getId();
+                    int cnt = orderReqeustsMap.getOrDefault(itemId, 0);
+
+                    stockService.subStock(itemId, cnt);
+                });
+
+
 
         // 구매 가능한 상품 총 가격
         long totalPrice = notOverQuantityItemDomains.stream()

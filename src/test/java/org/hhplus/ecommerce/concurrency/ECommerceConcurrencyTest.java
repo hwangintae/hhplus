@@ -1,18 +1,22 @@
-package org.hhplus.ecommerce.orders.usecase;
+package org.hhplus.ecommerce.concurrency;
 
 import org.hhplus.ecommerce.cash.entity.Cash;
 import org.hhplus.ecommerce.cash.entity.CashHistoryRepository;
 import org.hhplus.ecommerce.cash.entity.CashRepository;
 import org.hhplus.ecommerce.cash.service.CashDomain;
+import org.hhplus.ecommerce.cash.service.CashRequest;
 import org.hhplus.ecommerce.cash.service.CashService;
 import org.hhplus.ecommerce.item.entity.Item;
 import org.hhplus.ecommerce.item.entity.ItemRepository;
 import org.hhplus.ecommerce.item.entity.Stock;
 import org.hhplus.ecommerce.item.entity.StockRepository;
+import org.hhplus.ecommerce.item.service.StockDomain;
+import org.hhplus.ecommerce.item.service.StockService;
 import org.hhplus.ecommerce.orders.entity.OrderItemRepository;
 import org.hhplus.ecommerce.orders.entity.OrdersRepository;
 import org.hhplus.ecommerce.orders.service.OrderItemDomain;
 import org.hhplus.ecommerce.orders.service.OrderRequest;
+import org.hhplus.ecommerce.orders.usecase.OrdersFacade;
 import org.hhplus.ecommerce.user.entity.User;
 import org.hhplus.ecommerce.user.entity.UserRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -22,18 +26,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
 @SpringBootTest
-class OrdersFacadeTest {
-
+public class ECommerceConcurrencyTest {
     @Autowired
     private OrdersFacade ordersFacade;
 
     @Autowired
     private CashService cashService;
+
+    @Autowired
+    private StockService stockService;
 
     @Autowired
     private OrdersRepository ordersRepository;
@@ -68,7 +76,7 @@ class OrdersFacadeTest {
     }
 
     @Test
-    @DisplayName("상품을 주문할 때 재고가 있는 상품만 주문 된다.")
+    @DisplayName("한명의 사용자가 동시에 여러번 주문 했을 경우 동시성 제어 테스트")
     public void createOrder() {
         // given
         User user = userRepository.save(User.builder().username("타일러").build());
@@ -79,43 +87,57 @@ class OrdersFacadeTest {
                 .amount(Long.MAX_VALUE)
                 .build());
 
-        itemRepository.saveAll(List.of(
-                Item.builder().name("신촌그랑자이").price(2_900L).build(),
-                Item.builder().name("브라이튼N40").price(3_200L).build(),
-                Item.builder().name("아크로서울포레스트").price(5_500L).build()
-        ));
-        List<Item> items = itemRepository.findAll();
+        Item item = itemRepository.save(Item.builder().name("반포자이").price(2_900L).build());
+        stockRepository.save(Stock.builder().itemId(item.getId()).quantity(100).build());
 
-        List<Stock> stocks = items.stream()
-                .map(item -> Stock.builder()
-                        .itemId(item.getId())
-                        .quantity(100)
-                        .build())
-                .toList();
-        stockRepository.saveAll(stocks);
 
         List<OrderRequest> orderRequests = List.of(
-                OrderRequest.builder().itemId(items.get(0).getId()).cnt(99).build(),
-                OrderRequest.builder().itemId(items.get(1).getId()).cnt(100).build(),
-                OrderRequest.builder().itemId(items.get(2).getId()).cnt(101).build()
+                OrderRequest.builder().itemId(item.getId()).cnt(1).build()
         );
 
         // when
-        List<OrderItemDomain> orderItemDomains = ordersFacade.createOrder(userId, orderRequests);
+        CompletableFuture.allOf(
+                LongStream.rangeClosed(1, 30)
+                        .mapToObj(idx -> CompletableFuture.runAsync(() -> ordersFacade.createOrder(userId, orderRequests)))
+                        .toArray(CompletableFuture[]::new)
+        ).join();
+
+        // then
+        // 재고 확인
+        StockDomain stockDomain = stockService.getStock(item.getId());
+        assertThat(stockDomain.getQuantity()).isEqualTo(100 - 30);
+
+        // 잔액이 맞는지 확인
+        CashDomain cashDomain = cashService.getCash(userId);
+        assertThat(cashDomain.getAmount()).isEqualTo(Long.MAX_VALUE - 2_900L * 30);
+    }
+
+
+    @Test
+    @DisplayName("사용자가 동시에 잔액 충전을 요청했을 때 동시성 제어")
+    public void addCash() {
+        // given
+        User user = userRepository.save(User.builder().username("타일러").build());
+        Long userId = user.getId();
+
+        cashRepository.save(Cash.builder()
+                .userId(userId)
+                .amount(10_000L)
+                .build());
+
+        CashRequest cashRequest = CashRequest.builder().userId(userId).amount(100_000L).build();
+
+        // when
+        CompletableFuture.allOf(
+                LongStream.rangeClosed(1, 30)
+                        .mapToObj(idx -> CompletableFuture.runAsync(() -> cashService.addCash(cashRequest)))
+                        .toArray(CompletableFuture[]::new)
+        ).join();
 
         // then
         CashDomain cashDomain = cashService.getCash(userId);
-
-        assertThat(orderItemDomains).hasSize(2)
-                .extracting("itemId", "itemCnt")
-                .contains(
-                        tuple(items.get(0).getId(), 99),
-                        tuple(items.get(1).getId(), 100)
-                );
-
-        // 잔액이 맞는지 확인
-        assertThat(cashDomain.getAmount())
-                .isEqualTo(Long.MAX_VALUE - (2_900L * 99) - (3_200L * 100));
+        assertThat(cashDomain.getAmount()).isEqualTo(10_000L + 100_000L * 30);
     }
+
 
 }

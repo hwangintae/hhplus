@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-public class CartUsecase {
+public class CartFacade {
 
     private final CartService cartService;
     private final ItemService itemService;
