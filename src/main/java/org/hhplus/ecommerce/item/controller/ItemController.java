@@ -1,13 +1,12 @@
 package org.hhplus.ecommerce.item.controller;
 
 import org.hhplus.ecommerce.common.ApiResponse;
-import org.hhplus.ecommerce.item.service.ItemResponse;
+import org.hhplus.ecommerce.item.usecase.ItemResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -18,7 +17,7 @@ public class ItemController {
     public ApiResponse<ItemResponse> getItem(@RequestParam Long itemId) {
         return ApiResponse.ok(ItemResponse.builder()
                 .name("아이폰 16 프로 맥스")
-                .price(new BigDecimal(1_900_000))
+                .price(1_900_000L)
                 .quantity(100)
                 .build());
     }
@@ -28,22 +27,22 @@ public class ItemController {
         List<ItemResponse> itemResponses = List.of(
                 ItemResponse.builder()
                         .name("아이폰 16 프로 맥스")
-                        .price(new BigDecimal(1_900_000))
+                        .price(1_900_000L)
                         .quantity(100)
                         .build(),
                 ItemResponse.builder()
                         .name("아이폰 16 프로")
-                        .price(new BigDecimal(1_550_000))
+                        .price(1_550_000L)
                         .quantity(101)
                         .build(),
                 ItemResponse.builder()
                         .name("아이폰 16 플러스")
-                        .price(new BigDecimal(1_350_000))
+                        .price(1_350_000L)
                         .quantity(110)
                         .build(),
                 ItemResponse.builder()
                         .name("아이폰 16")
-                        .price(new BigDecimal(1_250_000))
+                        .price(1_250_000L)
                         .quantity(111)
                         .build()
                 );
