@@ -46,7 +46,7 @@ public class OrdersService {
     }
 
     public List<TopOrderItemDomain> getTopFiveOrderItems(LocalDate today) {
-        List<TopOrderItem> topOrderItems = topOrderItemRepository.findByDate(today);
+        List<TopOrderItem> topOrderItems = topOrderItemRepository.findByCreateDay(today);
 
         return topOrderItems.stream()
                 .map(TopOrderItem::toDomain)
@@ -62,7 +62,7 @@ public class OrdersService {
         LocalDateTime endDateTime = now.atTime(LocalTime.MIDNIGHT);
         LocalDateTime startDateTime = endDateTime.minusDays(3);
 
-        List<OrderItem> topFiveDuringThreeDays = orderItemRepository.findTop5DuringThreeDays(startDateTime, endDateTime);
+        List<OrderItem> topFiveDuringThreeDays = orderItemRepository.findTopFiveDuringThreeDays(startDateTime, endDateTime);
 
         List<TopOrderItemDomain> resultDomains = topFiveDuringThreeDays.stream()
                 .map(item -> TopOrderItemDomain.builder()

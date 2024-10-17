@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 
-    @Query("SELECT oi FROM OrderItem oi WHERE oi.createdAt >= :startDateTime and oi.createdAt < :endDateTime ORDER BY oi.cnt DESC")
-    List<OrderItem> findTop5DuringThreeDays(@Param("startDateTime") LocalDateTime startDateTime,
-                                           @Param("endDateTime") LocalDateTime endDateTime);
+    @Query("SELECT oi FROM OrderItem oi WHERE oi.createdAt >= :startDateTime and oi.createdAt < :endDateTime ORDER BY oi.itemCnt DESC")
+    List<OrderItem> findTopFiveDuringThreeDays(@Param("startDateTime") LocalDateTime startDateTime,
+                                               @Param("endDateTime") LocalDateTime endDateTime);
 }
