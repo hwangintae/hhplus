@@ -2,11 +2,10 @@ package org.hhplus.ecommerce.cart.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.hhplus.ecommerce.cart.service.*;
-import org.hhplus.ecommerce.cart.usecase.CartUsecase;
+import org.hhplus.ecommerce.cart.usecase.CartFacade;
 import org.hhplus.ecommerce.common.RestApiResponse;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +17,7 @@ import java.util.List;
 @Tag(name = "Cart", description = "Cart 관련 API입니다.")
 public class CartController {
 
-    private final CartUsecase cartUsecase;
+    private final CartFacade cartFacade;
     private final CartService cartService;
 
     @Operation(summary = "장바구니 조회", description = "장바구니에 저장된 상품을 조회합니다.")
@@ -43,7 +42,7 @@ public class CartController {
     @ApiResponse(responseCode = "200", description = "장바구니에 상품 담기 성공")
     @PostMapping("/cart")
     public RestApiResponse<CartItemResponse> addCart(@RequestBody CartITemCreateWithUserId request) {
-        CartItemDomain cartItemDomain = cartUsecase.addCart(request.getUserId(), request.getCartItemCreate());
+        CartItemDomain cartItemDomain = cartFacade.addCart(request.getUserId(), request.getCartItemCreate());
 
         CartItemResponse cartItemResponse = CartItemResponse.builder()
                 .itemId(cartItemDomain.getItemId())

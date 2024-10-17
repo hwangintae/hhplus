@@ -29,6 +29,7 @@ public class ItemFacade {
         return ItemResponse.of(itemDomain, stockDomain);
     }
 
+    // 상품목록 조회
     @Transactional
     public List<ItemResponse> getItemsWithStock(List<Long> itemId) {
 

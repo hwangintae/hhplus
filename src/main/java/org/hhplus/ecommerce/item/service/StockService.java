@@ -18,12 +18,14 @@ public class StockService {
 
     private final StockRepository stockRepository;
 
+    @Transactional
     public StockDomain getStock(Long itemId) {
         return stockRepository.findByItemId(itemId)
                 .orElseThrow(() -> new EcommerceBadRequestException(ITEM_NOT_FOUND))
                 .toDomain();
     }
 
+    @Transactional
     public List<StockDomain> getStocks(List<Long> itemIds) {
         List<Stock> stocks = stockRepository.findByItemIdIn(itemIds);
 

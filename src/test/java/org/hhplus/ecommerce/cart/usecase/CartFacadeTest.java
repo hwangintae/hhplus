@@ -1,6 +1,5 @@
 package org.hhplus.ecommerce.cart.usecase;
 
-import org.assertj.core.api.Assertions;
 import org.hhplus.ecommerce.cart.entity.CartItemRepository;
 import org.hhplus.ecommerce.cart.entity.CartRepository;
 import org.hhplus.ecommerce.cart.service.CartItemCreate;
@@ -19,13 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-class CartUsecaseTest {
+class CartFacadeTest {
 
     @Autowired
-    private CartUsecase cartUsecase;
+    private CartFacade cartFacade;
 
     @Autowired
     private CartRepository cartRepository;
@@ -62,7 +60,7 @@ class CartUsecaseTest {
         User saveUser = userRepository.save(user);
 
         Item item = Item.builder()
-                .name("반포자이")
+                .name("신촌그랑자이")
                 .price(2_900L)
                 .build();
 
@@ -81,7 +79,7 @@ class CartUsecaseTest {
                 .build();
 
         // expected
-        assertThatThrownBy(() -> cartUsecase.addCart(saveUser.getId(), cartItemCreate))
+        assertThatThrownBy(() -> cartFacade.addCart(saveUser.getId(), cartItemCreate))
                 .isInstanceOf(EcommerceBadRequestException.class)
                 .hasMessage(EcommerceErrors.INSUFFICIENT_STOCK_NOT_IN_CART.getMessage());
     }

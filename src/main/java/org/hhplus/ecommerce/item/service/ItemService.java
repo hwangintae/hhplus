@@ -5,6 +5,7 @@ import org.hhplus.ecommerce.common.exception.EcommerceBadRequestException;
 import org.hhplus.ecommerce.item.entity.Item;
 import org.hhplus.ecommerce.item.entity.ItemRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ import static org.hhplus.ecommerce.common.exception.EcommerceErrors.ITEM_NOT_FOU
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ItemService {
 
     private final ItemRepository itemRepository;
