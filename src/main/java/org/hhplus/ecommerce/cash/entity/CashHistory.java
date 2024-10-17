@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hhplus.ecommerce.cash.service.CashHistoryDomain;
 import org.hhplus.ecommerce.cash.service.TransactionType;
 
 @Getter
@@ -42,6 +43,15 @@ public class CashHistory {
                 .cashId(cashId)
                 .amount(amount)
                 .type(TransactionType.USE)
+                .build();
+    }
+
+    public CashHistoryDomain toDomain() {
+        return CashHistoryDomain.builder()
+                .id(this.id)
+                .cashId(this.cashId)
+                .type(this.type)
+                .amount(this.amount)
                 .build();
     }
 }

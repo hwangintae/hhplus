@@ -38,7 +38,7 @@ public class StockService {
 
         stockDomain.subQuantity(cnt);
 
-        stockRepository.save(Stock.of(stockDomain));
+        stockRepository.save(stockDomain.toEntity());
     }
 
     public boolean checkStock(Long itemId, int cnt) {

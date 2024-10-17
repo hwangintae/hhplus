@@ -31,14 +31,6 @@ public class Cash {
         this.amount = amount;
     }
 
-    public static Cash of(CashDomain domain) {
-        return Cash.builder()
-                .id(domain.getId())
-                .userId(domain.getUserId())
-                .amount(domain.getAmount())
-                .build();
-    }
-
     public CashDomain toDomain() {
         return CashDomain.builder()
                 .id(this.id)

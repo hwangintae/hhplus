@@ -33,15 +33,6 @@ public class OrderItem {
         this.itemCnt = itemCnt;
     }
 
-    public static OrderItem of(OrderItemDomain domain) {
-        return OrderItem.builder()
-                .id(domain.getId())
-                .ordersId(domain.getOrdersId())
-                .itemId(domain.getItemId())
-                .itemCnt(domain.getItemCnt())
-                .build();
-    }
-
     public OrderItemDomain toDomain() {
         return OrderItemDomain.builder()
                 .id(this.id)

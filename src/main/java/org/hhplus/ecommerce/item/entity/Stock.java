@@ -30,14 +30,6 @@ public class Stock {
         this.quantity = quantity;
     }
 
-    public static Stock of(StockDomain domain) {
-        return Stock.builder()
-                .id(domain.getId())
-                .itemId(domain.getItemId())
-                .quantity(domain.getQuantity())
-                .build();
-    }
-
     public StockDomain toDomain() {
         return StockDomain.builder()
                 .id(this.id)

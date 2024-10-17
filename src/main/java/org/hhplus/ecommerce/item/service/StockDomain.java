@@ -3,6 +3,7 @@ package org.hhplus.ecommerce.item.service;
 import lombok.Builder;
 import lombok.Getter;
 import org.hhplus.ecommerce.common.exception.EcommerceBadRequestException;
+import org.hhplus.ecommerce.item.entity.Stock;
 
 import static org.hhplus.ecommerce.common.exception.EcommerceErrors.INSUFFICIENT_STOCK;
 
@@ -34,5 +35,13 @@ public class StockDomain {
 
     public boolean checkQuantity(int cnt) {
         return quantity - cnt >= 0;
+    }
+
+    public Stock toEntity() {
+        return Stock.builder()
+                .id(this.id)
+                .itemId(this.itemId)
+                .quantity(this.quantity)
+                .build();
     }
 }

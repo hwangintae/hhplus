@@ -2,6 +2,7 @@ package org.hhplus.ecommerce.item.service;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.hhplus.ecommerce.item.entity.Item;
 
 @Getter
 public class ItemDomain {
@@ -14,5 +15,13 @@ public class ItemDomain {
         this.id = id;
         this.name = name;
         this.price = price;
+    }
+
+    public Item toEntity() {
+        return Item.builder()
+                .id(this.id)
+                .name(this.name)
+                .price(this.price)
+                .build();
     }
 }

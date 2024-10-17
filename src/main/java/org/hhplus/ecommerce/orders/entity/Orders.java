@@ -29,14 +29,6 @@ public class Orders {
         this.status = status;
     }
 
-    public static Orders of(OrdersDomain domain) {
-        return Orders.builder()
-                .id(domain.getId())
-                .userId(domain.getUserId())
-                .status(domain.getStatus())
-                .build();
-    }
-
     public OrdersDomain toDomain() {
         return OrdersDomain.builder()
                 .id(this.id)

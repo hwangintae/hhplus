@@ -2,6 +2,7 @@ package org.hhplus.ecommerce.orders.service;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.hhplus.ecommerce.orders.entity.Orders;
 import org.hhplus.ecommerce.orders.usecase.OrderStatus;
 
 @Getter
@@ -22,6 +23,14 @@ public class OrdersDomain {
         return OrdersDomain.builder()
                 .userId(userId)
                 .status(OrderStatus.SUCCESS)
+                .build();
+    }
+
+    public Orders toEntity() {
+        return Orders.builder()
+                .id(this.id)
+                .userId(this.userId)
+                .status(this.status)
                 .build();
     }
 }

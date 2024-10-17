@@ -2,6 +2,7 @@ package org.hhplus.ecommerce.cash.service;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.hhplus.ecommerce.cash.entity.Cash;
 import org.hhplus.ecommerce.common.exception.EcommerceBadRequestException;
 import org.hhplus.ecommerce.common.exception.EcommerceErrors;
 
@@ -20,6 +21,14 @@ public class CashDomain {
         this.id = id;
         this.userId = userId;
         this.amount = amount;
+    }
+
+    public Cash toEntity() {
+        return Cash.builder()
+                .id(this.id)
+                .userId(this.userId)
+                .amount(this.amount)
+                .build();
     }
 
     public void add(long amount) {

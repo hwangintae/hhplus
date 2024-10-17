@@ -34,7 +34,7 @@ public class CashService {
 
         cashDomain.add(request.getAmount());
 
-        Cash cash = cashRepository.save(Cash.of(cashDomain));
+        Cash cash = cashRepository.save(cashDomain.toEntity());
 
         CashHistory cashHistory = CashHistory.generateChargeCashHistory(cash.getId(), request.getAmount());
         cashHistoryRepository.save(cashHistory);
@@ -51,7 +51,7 @@ public class CashService {
 
         cashDomain.sub(request.getAmount());
 
-        Cash cash = cashRepository.save(Cash.of(cashDomain));
+        Cash cash = cashRepository.save(cashDomain.toEntity());
 
         CashHistory cashHistory = CashHistory.generateUseCashHistory(cash.getId(), request.getAmount());
         cashHistoryRepository.save(cashHistory);

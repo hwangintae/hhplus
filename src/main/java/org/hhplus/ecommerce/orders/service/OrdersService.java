@@ -23,7 +23,7 @@ public class OrdersService {
 
         OrdersDomain ordersDomain = OrdersDomain.generateOrdersDomain(userId);
 
-        Orders orders = ordersRepository.save(Orders.of(ordersDomain));
+        Orders orders = ordersRepository.save(ordersDomain.toEntity());
 
         List<OrderItemDomain> orderItemDomains = orderRequests.stream()
                 .map(request -> OrderItemDomain.builder()
@@ -34,7 +34,7 @@ public class OrdersService {
                 .toList();
 
         List<OrderItem> orderItems = orderItemRepository.saveAll(orderItemDomains.stream()
-                .map(OrderItem::of)
+                .map(OrderItemDomain::toEntity)
                 .toList());
 
         return orderItems.stream()
