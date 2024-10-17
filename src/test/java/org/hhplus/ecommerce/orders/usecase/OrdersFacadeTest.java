@@ -1,6 +1,5 @@
 package org.hhplus.ecommerce.orders.usecase;
 
-import org.assertj.core.api.Assertions;
 import org.hhplus.ecommerce.cash.entity.Cash;
 import org.hhplus.ecommerce.cash.entity.CashHistoryRepository;
 import org.hhplus.ecommerce.cash.entity.CashRepository;
