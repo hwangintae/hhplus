@@ -5,9 +5,12 @@ import org.hhplus.ecommerce.cart.entity.Cart;
 import org.hhplus.ecommerce.cart.entity.CartItem;
 import org.hhplus.ecommerce.cart.entity.CartItemRepository;
 import org.hhplus.ecommerce.cart.entity.CartRepository;
+import org.hhplus.ecommerce.common.exception.EcommerceBadRequestException;
+import org.hhplus.ecommerce.common.exception.EcommerceErrors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -15,6 +18,17 @@ import java.util.Optional;
 public class CartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
+
+    public List<CartItemDomain> getCartItems(Long userId) {
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new EcommerceBadRequestException(EcommerceErrors.USER_NOT_FOUND));
+
+        List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
+
+        return cartItems.stream()
+                .map(CartItem::toDomain)
+                .toList();
+    }
 
     @Transactional
     public CartItemDomain addItem(Long userId, Long itemId, int cnt) {
