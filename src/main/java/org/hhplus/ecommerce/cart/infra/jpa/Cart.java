@@ -1,4 +1,4 @@
-package org.hhplus.ecommerce.cart.entity;
+package org.hhplus.ecommerce.cart.infra.jpa;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,6 +25,12 @@ public class Cart {
     protected Cart(Long id, Long userId) {
         this.id = id;
         this.userId = userId;
+    }
+
+    public static Cart of(Long userId) {
+        return Cart.builder()
+                .userId(userId)
+                .build();
     }
 
     public CartDomain toDomain() {

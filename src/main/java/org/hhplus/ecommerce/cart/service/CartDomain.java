@@ -2,7 +2,7 @@ package org.hhplus.ecommerce.cart.service;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.hhplus.ecommerce.cart.entity.Cart;
+import org.hhplus.ecommerce.cart.infra.jpa.Cart;
 
 @Getter
 public class CartDomain {

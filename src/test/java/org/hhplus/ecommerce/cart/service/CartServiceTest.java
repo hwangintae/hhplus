@@ -1,14 +1,12 @@
 package org.hhplus.ecommerce.cart.service;
 
-import org.assertj.core.api.Assertions;
-import org.hhplus.ecommerce.cart.entity.Cart;
-import org.hhplus.ecommerce.cart.entity.CartItem;
-import org.hhplus.ecommerce.cart.entity.CartItemRepository;
-import org.hhplus.ecommerce.cart.entity.CartRepository;
+import org.hhplus.ecommerce.cart.infra.jpa.Cart;
+import org.hhplus.ecommerce.cart.infra.jpa.CartItem;
+import org.hhplus.ecommerce.cart.infra.repository.CartItemRepository;
+import org.hhplus.ecommerce.cart.infra.repository.CartRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -53,8 +51,7 @@ class CartServiceTest {
                 .deleteAt(false)
                 .build();
 
-        given(cartRepository.findByUserId(anyLong())).willReturn(Optional.empty());
-        given(cartRepository.save(any(Cart.class))).willReturn(cart);
+        given(cartRepository.findByUserId(anyLong())).willReturn(cart);
         given(cartItemRepository.save(any(CartItem.class))).willReturn(cartItem);
 
         // when

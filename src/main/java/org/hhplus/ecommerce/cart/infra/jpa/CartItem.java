@@ -1,4 +1,4 @@
-package org.hhplus.ecommerce.cart.entity;
+package org.hhplus.ecommerce.cart.infra.jpa;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
