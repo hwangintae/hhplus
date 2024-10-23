@@ -1,79 +1,23 @@
-package org.hhplus.ecommerce.concurrency;
+package org.hhplus.ecommerce.integrationTest;
 
 import org.hhplus.ecommerce.cash.entity.Cash;
-import org.hhplus.ecommerce.cash.entity.CashHistoryRepository;
-import org.hhplus.ecommerce.cash.entity.CashRepository;
 import org.hhplus.ecommerce.cash.service.CashDomain;
 import org.hhplus.ecommerce.cash.service.CashRequest;
-import org.hhplus.ecommerce.cash.service.CashService;
 import org.hhplus.ecommerce.item.entity.Item;
-import org.hhplus.ecommerce.item.entity.ItemRepository;
 import org.hhplus.ecommerce.item.entity.Stock;
-import org.hhplus.ecommerce.item.entity.StockRepository;
 import org.hhplus.ecommerce.item.service.StockDomain;
-import org.hhplus.ecommerce.item.service.StockService;
-import org.hhplus.ecommerce.orders.entity.OrderItemRepository;
-import org.hhplus.ecommerce.orders.entity.OrdersRepository;
-import org.hhplus.ecommerce.orders.service.OrderItemDomain;
 import org.hhplus.ecommerce.orders.service.OrderRequest;
-import org.hhplus.ecommerce.orders.usecase.OrdersFacade;
 import org.hhplus.ecommerce.user.entity.User;
-import org.hhplus.ecommerce.user.entity.UserRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
 
-@SpringBootTest
-public class ECommerceConcurrencyTest {
-    @Autowired
-    private OrdersFacade ordersFacade;
-
-    @Autowired
-    private CashService cashService;
-
-    @Autowired
-    private StockService stockService;
-
-    @Autowired
-    private OrdersRepository ordersRepository;
-
-    @Autowired
-    private OrderItemRepository orderItemRepository;
-
-    @Autowired
-    private CashRepository cashRepository;
-
-    @Autowired
-    private ItemRepository itemRepository;
-
-    @Autowired
-    private CashHistoryRepository cashHistoryRepository;
-
-    @Autowired
-    private StockRepository stockRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @AfterEach
-    void tearDown() {
-        ordersRepository.deleteAll();
-        orderItemRepository.deleteAll();
-        cashRepository.deleteAll();
-        itemRepository.deleteAll();
-        cashHistoryRepository.deleteAll();
-        stockRepository.deleteAll();
-        userRepository.deleteAll();
-    }
+public class ECommerceConcurrencyTest extends IntegrationTestSupport {
 
     @Test
     @DisplayName("한명의 사용자가 동시에 여러번 주문 했을 경우 동시성 제어 테스트")
