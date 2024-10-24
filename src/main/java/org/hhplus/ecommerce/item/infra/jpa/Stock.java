@@ -1,4 +1,4 @@
-package org.hhplus.ecommerce.item.entity;
+package org.hhplus.ecommerce.item.infra.jpa;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,29 +8,33 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hhplus.ecommerce.item.service.HashTagDomain;
+import org.hhplus.ecommerce.item.service.StockDomain;
 
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class HashTag {
+public class Stock {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private Long itemId;
+
+    private int quantity;
 
     @Builder
-    protected HashTag(Long id, String name) {
+    protected Stock(Long id, Long itemId, int quantity) {
         this.id = id;
-        this.name = name;
+        this.itemId = itemId;
+        this.quantity = quantity;
     }
 
-    public HashTagDomain toDomain() {
-        return HashTagDomain.builder()
+    public StockDomain toDomain() {
+        return StockDomain.builder()
                 .id(this.id)
-                .name(this.name)
+                .itemId(this.itemId)
+                .quantity(this.quantity)
                 .build();
     }
 }

@@ -1,4 +1,4 @@
-package org.hhplus.ecommerce.item.entity;
+package org.hhplus.ecommerce.item.infra.jpa;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hhplus.ecommerce.item.service.ItemDomain;
-
-import java.math.BigDecimal;
 
 @Getter
 @Entity

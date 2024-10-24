@@ -1,15 +1,12 @@
 package org.hhplus.ecommerce.item.service;
 
 import lombok.RequiredArgsConstructor;
-import org.hhplus.ecommerce.common.exception.EcommerceBadRequestException;
-import org.hhplus.ecommerce.item.entity.Stock;
-import org.hhplus.ecommerce.item.entity.StockRepository;
+import org.hhplus.ecommerce.item.infra.jpa.Stock;
+import org.hhplus.ecommerce.item.infra.repository.StockRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
-import static org.hhplus.ecommerce.common.exception.EcommerceErrors.ITEM_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +18,6 @@ public class StockService {
     @Transactional
     public StockDomain getStock(Long itemId) {
         return stockRepository.findByItemId(itemId)
-                .orElseThrow(() -> new EcommerceBadRequestException(ITEM_NOT_FOUND))
                 .toDomain();
     }
 
