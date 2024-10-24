@@ -61,8 +61,6 @@ public class OrdersFacade {
                     stockService.subStock(itemId, cnt);
                 });
 
-
-
         // 구매 가능한 상품 총 가격
         long totalPrice = notOverQuantityItemDomains.stream()
                 .mapToLong(itemDomain -> {

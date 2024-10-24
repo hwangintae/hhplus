@@ -34,7 +34,7 @@ public class ItemController {
     @Operation(summary = "상품 목록 조회", description = "상품 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "상품 목록 조회 성공")
     @GetMapping("items")
-    public RestApiResponse<List<ItemResponse>> getItems(List<Long> itemIds) {
+    public RestApiResponse<List<ItemResponse>> getItems(@RequestParam List<Long> itemIds) {
         List<ItemResponse> itemResponses = itemFacade.getItemsWithStock(itemIds);
 
         return RestApiResponse.ok(itemResponses);
