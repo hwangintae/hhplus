@@ -1,25 +1,32 @@
 package org.hhplus.ecommerce.orders.usecase;
 
-import org.hhplus.ecommerce.cash.entity.Cash;
-import org.hhplus.ecommerce.cash.entity.CashHistoryRepository;
-import org.hhplus.ecommerce.cash.entity.CashRepository;
+import org.hhplus.ecommerce.cash.infra.jpa.Cash;
+import org.hhplus.ecommerce.cash.infra.jpa.CashHistoryJpaRepository;
+import org.hhplus.ecommerce.cash.infra.jpa.CashJpaRepository;
 import org.hhplus.ecommerce.cash.service.CashDomain;
 import org.hhplus.ecommerce.cash.service.CashService;
-import org.hhplus.ecommerce.item.entity.Item;
-import org.hhplus.ecommerce.item.entity.ItemRepository;
-import org.hhplus.ecommerce.item.entity.Stock;
-import org.hhplus.ecommerce.item.entity.StockRepository;
-import org.hhplus.ecommerce.orders.entity.OrderItemRepository;
-import org.hhplus.ecommerce.orders.entity.OrdersRepository;
+import org.hhplus.ecommerce.item.infra.jpa.Item;
+import org.hhplus.ecommerce.item.infra.jpa.ItemJpaRepository;
+import org.hhplus.ecommerce.item.infra.jpa.Stock;
+import org.hhplus.ecommerce.item.infra.jpa.StockJpaRepository;
+import org.hhplus.ecommerce.orders.infra.jpa.OrderItemJpaRepository;
+import org.hhplus.ecommerce.orders.infra.jpa.OrdersJpaRepository;
 import org.hhplus.ecommerce.orders.service.OrderItemDomain;
 import org.hhplus.ecommerce.orders.service.OrderRequest;
 import org.hhplus.ecommerce.user.entity.User;
 import org.hhplus.ecommerce.user.entity.UserRepository;
+import org.junit.ClassRule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
@@ -27,7 +34,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
 @SpringBootTest
+@Testcontainers
 class OrdersFacadeTest {
+
+    @ClassRule
+    @Container
+    public static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0")
+            .withDatabaseName("db_commerce_srv")
+            .withUsername("us_hhplus_commerce")
+            .withPassword("commerce!#24");
+
+    @DynamicPropertySource
+    static void setUpProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
+        registry.add("spring.datasource.username", mysqlContainer::getUsername);
+        registry.add("spring.datasource.password", mysqlContainer::getPassword);
+    }
 
     @Autowired
     private OrdersFacade ordersFacade;
@@ -36,34 +58,34 @@ class OrdersFacadeTest {
     private CashService cashService;
 
     @Autowired
-    private OrdersRepository ordersRepository;
+    private OrdersJpaRepository ordersJpaRepository;
 
     @Autowired
-    private OrderItemRepository orderItemRepository;
+    private OrderItemJpaRepository orderItemJpaRepository;
 
     @Autowired
-    private CashRepository cashRepository;
+    private CashJpaRepository cashJpaRepository;
 
     @Autowired
-    private ItemRepository itemRepository;
+    private ItemJpaRepository itemJpaRepository;
 
     @Autowired
-    private CashHistoryRepository cashHistoryRepository;
+    private CashHistoryJpaRepository cashHistoryJpaRepository;
 
     @Autowired
-    private StockRepository stockRepository;
+    private StockJpaRepository stockJpaRepository;
 
     @Autowired
     private UserRepository userRepository;
 
     @AfterEach
     void tearDown() {
-        ordersRepository.deleteAll();
-        orderItemRepository.deleteAll();
-        cashRepository.deleteAll();
-        itemRepository.deleteAll();
-        cashHistoryRepository.deleteAll();
-        stockRepository.deleteAll();
+        ordersJpaRepository.deleteAll();
+        orderItemJpaRepository.deleteAll();
+        cashJpaRepository.deleteAll();
+        itemJpaRepository.deleteAll();
+        cashHistoryJpaRepository.deleteAll();
+        stockJpaRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -74,17 +96,17 @@ class OrdersFacadeTest {
         User user = userRepository.save(User.builder().username("타일러").build());
         Long userId = user.getId();
 
-        cashRepository.save(Cash.builder()
+        cashJpaRepository.save(Cash.builder()
                 .userId(userId)
                 .amount(Long.MAX_VALUE)
                 .build());
 
-        itemRepository.saveAll(List.of(
+        itemJpaRepository.saveAll(List.of(
                 Item.builder().name("신촌그랑자이").price(2_900L).build(),
                 Item.builder().name("브라이튼N40").price(3_200L).build(),
                 Item.builder().name("아크로서울포레스트").price(5_500L).build()
         ));
-        List<Item> items = itemRepository.findAll();
+        List<Item> items = itemJpaRepository.findAll();
 
         List<Stock> stocks = items.stream()
                 .map(item -> Stock.builder()
@@ -92,7 +114,7 @@ class OrdersFacadeTest {
                         .quantity(100)
                         .build())
                 .toList();
-        stockRepository.saveAll(stocks);
+        stockJpaRepository.saveAll(stocks);
 
         List<OrderRequest> orderRequests = List.of(
                 OrderRequest.builder().itemId(items.get(0).getId()).cnt(99).build(),
