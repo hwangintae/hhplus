@@ -51,7 +51,7 @@ class CartServiceTest {
                 .deleteAt(false)
                 .build();
 
-        given(cartRepository.findByUserId(anyLong())).willReturn(cart);
+        given(cartRepository.findByOrElse(anyLong())).willReturn(cart);
         given(cartItemRepository.save(any(CartItem.class))).willReturn(cartItem);
 
         // when

@@ -1,4 +1,4 @@
-package org.hhplus.ecommerce.cash.entity;
+package org.hhplus.ecommerce.cash.infra.jpa;
 
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.QueryHints;
 
 import java.util.Optional;
 
-public interface CashRepository extends JpaRepository<Cash, Long> {
+public interface CashJpaRepository extends JpaRepository<Cash, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints({@QueryHint(name = "javax.persistence.lock.timeout", value = "5000")})

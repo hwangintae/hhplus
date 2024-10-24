@@ -1,27 +1,27 @@
 package org.hhplus.ecommerce.cash.service;
 
 import lombok.RequiredArgsConstructor;
-import org.hhplus.ecommerce.cash.entity.Cash;
-import org.hhplus.ecommerce.cash.entity.CashHistory;
-import org.hhplus.ecommerce.cash.entity.CashHistoryRepository;
-import org.hhplus.ecommerce.cash.entity.CashRepository;
-import org.hhplus.ecommerce.common.exception.EcommerceBadRequestException;
+import org.hhplus.ecommerce.cash.infra.jpa.Cash;
+import org.hhplus.ecommerce.cash.infra.jpa.CashHistory;
+import org.hhplus.ecommerce.cash.infra.jpa.CashHistoryJpaRepository;
+import org.hhplus.ecommerce.cash.infra.jpa.CashJpaRepository;
+import org.hhplus.ecommerce.cash.infra.repository.CashHistoryRepository;
+import org.hhplus.ecommerce.cash.infra.repository.CashRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.hhplus.ecommerce.common.exception.EcommerceErrors.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
 public class CashService {
 
     private final CashRepository cashRepository;
+    private final CashJpaRepository cashJpaRepository;
+    private final CashHistoryJpaRepository cashHistoryJpaRepository;
     private final CashHistoryRepository cashHistoryRepository;
 
     @Transactional
     public CashDomain getCash(Long userId) {
         return cashRepository.findByUserId(userId)
-                .orElseThrow(() -> new EcommerceBadRequestException(USER_NOT_FOUND))
                 .toDomain();
     }
 
@@ -29,7 +29,6 @@ public class CashService {
     public CashDomain addCash(CashRequest request) {
 
         CashDomain cashDomain = cashRepository.findByUserId(request.getUserId())
-                .orElseThrow(() -> new EcommerceBadRequestException(USER_NOT_FOUND))
                 .toDomain();
 
         cashDomain.add(request.getAmount());
@@ -46,7 +45,6 @@ public class CashService {
     public CashDomain subCash(CashRequest request) {
 
         CashDomain cashDomain = cashRepository.findByUserId(request.getUserId())
-                .orElseThrow(() -> new EcommerceBadRequestException(USER_NOT_FOUND))
                 .toDomain();
 
         cashDomain.sub(request.getAmount());

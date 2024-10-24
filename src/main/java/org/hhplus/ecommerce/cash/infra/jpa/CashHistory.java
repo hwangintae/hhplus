@@ -1,4 +1,4 @@
-package org.hhplus.ecommerce.cash.entity;
+package org.hhplus.ecommerce.cash.infra.jpa;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

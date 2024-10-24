@@ -1,4 +1,4 @@
-package org.hhplus.ecommerce.cash.entity;
+package org.hhplus.ecommerce.cash.infra.jpa;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,8 +8,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hhplus.ecommerce.cash.service.CashDomain;
-
-import java.math.BigDecimal;
 
 @Getter
 @Entity
