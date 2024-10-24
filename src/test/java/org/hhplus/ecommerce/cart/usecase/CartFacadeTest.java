@@ -1,7 +1,7 @@
 package org.hhplus.ecommerce.cart.usecase;
 
-import org.hhplus.ecommerce.cart.entity.CartItemRepository;
-import org.hhplus.ecommerce.cart.entity.CartRepository;
+import org.hhplus.ecommerce.cart.infra.jpa.CartItemJpaRepository;
+import org.hhplus.ecommerce.cart.infra.jpa.CartJpaRepository;
 import org.hhplus.ecommerce.cart.service.CartItemCreate;
 import org.hhplus.ecommerce.common.exception.EcommerceBadRequestException;
 import org.hhplus.ecommerce.common.exception.EcommerceErrors;
@@ -26,10 +26,10 @@ class CartFacadeTest {
     private CartFacade cartFacade;
 
     @Autowired
-    private CartRepository cartRepository;
+    private CartJpaRepository cartJpaRepository;
 
     @Autowired
-    private CartItemRepository cartItemRepository;
+    private CartItemJpaRepository cartItemJpaRepository;
 
     @Autowired
     private ItemRepository itemRepository;
@@ -42,8 +42,8 @@ class CartFacadeTest {
 
     @AfterEach
     void tearDown() {
-        cartRepository.deleteAll();
-        cartItemRepository.deleteAll();
+        cartJpaRepository.deleteAll();
+        cartItemJpaRepository.deleteAll();
         itemRepository.deleteAll();
         stockRepository.deleteAll();
         userRepository.deleteAll();

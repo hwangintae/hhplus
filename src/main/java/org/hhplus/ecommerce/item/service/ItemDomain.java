@@ -2,7 +2,7 @@ package org.hhplus.ecommerce.item.service;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.hhplus.ecommerce.item.entity.Item;
+import org.hhplus.ecommerce.item.infra.jpa.Item;
 
 @Getter
 public class ItemDomain {

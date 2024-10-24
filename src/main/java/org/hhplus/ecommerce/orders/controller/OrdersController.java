@@ -22,7 +22,6 @@ import java.util.List;
 public class OrdersController {
 
     private final OrdersFacade ordersFacade;
-    private final DataPlatformService dataPlatformService;
     private final OrdersService ordersService;
 
     @Operation(summary = "상품 주문", description = "상품을 주문 합니다.")
@@ -32,8 +31,6 @@ public class OrdersController {
 
         List<OrderItemDomain> orderItemDomains =
                 ordersFacade.createOrder(request.getUserId(), request.getOrderRequests());
-
-        dataPlatformService.sendData(orderItemDomains);
 
         List<OrderResponse> orderResponses = orderItemDomains.stream()
                 .map(item -> OrderResponse.builder()

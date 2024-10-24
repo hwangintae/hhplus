@@ -2,8 +2,9 @@ package org.hhplus.ecommerce.item.service;
 
 import org.hhplus.ecommerce.common.exception.EcommerceBadRequestException;
 import org.hhplus.ecommerce.common.exception.EcommerceErrors;
-import org.hhplus.ecommerce.item.entity.Stock;
-import org.hhplus.ecommerce.item.entity.StockRepository;
+import org.hhplus.ecommerce.item.infra.jpa.Stock;
+import org.hhplus.ecommerce.item.infra.jpa.StockJpaRepository;
+import org.hhplus.ecommerce.item.infra.repository.StockRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,20 +26,6 @@ class StockServiceTest {
     
     @Mock
     private StockRepository stockRepository;
-    
-    @Test
-    @DisplayName("재고 조회 시, 상품 ID가 없는 경우 exception이 발생한다.")
-    public void getStockWithoutItemId() {
-        // given
-        Long itemId = 11L;
-
-        given(stockRepository.findByItemId(anyLong())).willReturn(Optional.empty());
-        
-        // expected
-        assertThatThrownBy(() -> stockService.getStock(itemId))
-                .isInstanceOf(EcommerceBadRequestException.class)
-                .hasMessage(EcommerceErrors.ITEM_NOT_FOUND.getMessage());
-    }
 
     @Test
     @DisplayName("재고 차감 시, 남은 수량 보다 많은 재고를 차감하면 exception이 발생한다.")
@@ -53,11 +40,11 @@ class StockServiceTest {
                 .quantity(quantity)
                 .build();
 
-        given(stockRepository.findByItemId(anyLong())).willReturn(Optional.of(stock));
+        given(stockRepository.findByItemId(anyLong())).willReturn(stock);
 
         // expected
         assertThatThrownBy(() -> stockService.subStock(itemId, quantity + 1))
-                .isInstanceOf(EcommerceBadRequestException.class)
+                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(EcommerceErrors.INSUFFICIENT_STOCK.getMessage());
 
     }

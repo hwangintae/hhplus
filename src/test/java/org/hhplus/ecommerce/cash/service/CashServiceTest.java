@@ -1,7 +1,7 @@
 package org.hhplus.ecommerce.cash.service;
 
-import org.hhplus.ecommerce.cash.entity.Cash;
-import org.hhplus.ecommerce.cash.entity.CashRepository;
+import org.hhplus.ecommerce.cash.infra.jpa.Cash;
+import org.hhplus.ecommerce.cash.infra.repository.CashRepository;
 import org.hhplus.ecommerce.common.exception.EcommerceBadRequestException;
 import org.hhplus.ecommerce.common.exception.EcommerceErrors;
 import org.junit.jupiter.api.DisplayName;
@@ -11,10 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hhplus.ecommerce.common.exception.EcommerceErrors.USER_NOT_FOUND;
+import static org.hhplus.ecommerce.common.exception.EcommerceErrors.ILLEGAL_AMOUNT;
+import static org.hhplus.ecommerce.common.exception.EcommerceErrors.INSUFFICIENT_USER_CASH;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 
@@ -25,20 +24,6 @@ class CashServiceTest {
 
     @Mock
     private CashRepository cashRepository;
-
-    @Test
-    @DisplayName("잔액조회 시, 사용자 ID가 없는 경우 exception이 발생한다.")
-    public void getCashWithoutUserId() {
-        // given
-        Long userId = 333L;
-
-        given(cashRepository.findByUserId(anyLong())).willReturn(Optional.empty());
-
-        // expected
-        assertThatThrownBy(() -> cashService.getCash(userId))
-                .isInstanceOf(EcommerceBadRequestException.class)
-                .hasMessage(EcommerceErrors.USER_NOT_FOUND.getMessage());
-    }
 
     @Test
     @DisplayName("잔액 사용 시, 충전된 금액 보다 많은 금액을 사용할 수 없다.")
@@ -58,12 +43,12 @@ class CashServiceTest {
                 .amount(amount)
                 .build();
 
-        given(cashRepository.findByUserId(anyLong())).willReturn(Optional.of(cash));
+        given(cashRepository.findByUserId(anyLong())).willReturn(cash);
 
         // expected
         assertThatThrownBy(() -> cashService.subCash(cashRequest))
-                .isInstanceOf(EcommerceBadRequestException.class)
-                .hasMessage(EcommerceErrors.INSUFFICIENT_USER_CASH.getMessage());
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(INSUFFICIENT_USER_CASH.getMessage());
     }
 
     @Test
@@ -83,12 +68,12 @@ class CashServiceTest {
                 .amount(-1L)
                 .build();
 
-        given(cashRepository.findByUserId(anyLong())).willReturn(Optional.of(cash));
+        given(cashRepository.findByUserId(anyLong())).willReturn(cash);
 
         // expected
         assertThatThrownBy(() -> cashService.addCash(cashRequest))
-                .isInstanceOf(EcommerceBadRequestException.class)
-                .hasMessage(EcommerceErrors.ILLEGAL_AMOUNT.getMessage());
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(ILLEGAL_AMOUNT.getMessage());
     }
 
     @Test
@@ -108,12 +93,12 @@ class CashServiceTest {
                 .amount(0L)
                 .build();
 
-        given(cashRepository.findByUserId(anyLong())).willReturn(Optional.of(cash));
+        given(cashRepository.findByUserId(anyLong())).willReturn(cash);
 
         // expected
         assertThatThrownBy(() -> cashService.subCash(cashRequest))
-                .isInstanceOf(EcommerceBadRequestException.class)
-                .hasMessage(EcommerceErrors.ILLEGAL_AMOUNT.getMessage());
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(ILLEGAL_AMOUNT.getMessage());
     }
 
 }

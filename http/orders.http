@@ -13,4 +13,4 @@ Content-Type: application/json
 }
 
 ### 주문 목록 조회
-GET http://localhost:8080/api/orders?userId=2
+GET http://localhost:8080/api/orders?userId=3

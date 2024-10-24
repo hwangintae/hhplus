@@ -3,7 +3,7 @@ package org.hhplus.ecommerce.item.service;
 import lombok.Builder;
 import lombok.Getter;
 import org.hhplus.ecommerce.common.exception.EcommerceBadRequestException;
-import org.hhplus.ecommerce.item.entity.Stock;
+import org.hhplus.ecommerce.item.infra.jpa.Stock;
 
 import static org.hhplus.ecommerce.common.exception.EcommerceErrors.INSUFFICIENT_STOCK;
 
@@ -27,7 +27,7 @@ public class StockDomain {
 
     public void subQuantity(int cnt) {
         if (quantity - cnt < 0) {
-            throw new EcommerceBadRequestException(INSUFFICIENT_STOCK);
+            throw new IllegalArgumentException(INSUFFICIENT_STOCK.getMessage());
         }
 
         this.quantity -= cnt;

@@ -2,11 +2,8 @@ package org.hhplus.ecommerce.cash.service;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.hhplus.ecommerce.cash.entity.Cash;
+import org.hhplus.ecommerce.cash.infra.jpa.Cash;
 import org.hhplus.ecommerce.common.exception.EcommerceBadRequestException;
-import org.hhplus.ecommerce.common.exception.EcommerceErrors;
-
-import java.math.BigDecimal;
 
 import static org.hhplus.ecommerce.common.exception.EcommerceErrors.ILLEGAL_AMOUNT;
 import static org.hhplus.ecommerce.common.exception.EcommerceErrors.INSUFFICIENT_USER_CASH;
@@ -34,7 +31,7 @@ public class CashDomain {
 
     public void add(long amount) {
         if (amount <= 0) {
-            throw new EcommerceBadRequestException(ILLEGAL_AMOUNT);
+            throw new IllegalArgumentException(ILLEGAL_AMOUNT.getMessage());
         }
 
         this.amount += amount;
@@ -42,11 +39,11 @@ public class CashDomain {
 
     public void sub(long amount) {
         if (amount <= 0) {
-            throw new EcommerceBadRequestException(ILLEGAL_AMOUNT);
+            throw new IllegalArgumentException(ILLEGAL_AMOUNT.getMessage());
         }
 
         if (this.amount - amount < 0) {
-            throw new EcommerceBadRequestException(INSUFFICIENT_USER_CASH);
+            throw new IllegalArgumentException(INSUFFICIENT_USER_CASH.getMessage());
         }
 
         this.amount -= amount;

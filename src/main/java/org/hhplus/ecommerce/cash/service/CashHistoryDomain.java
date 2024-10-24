@@ -2,7 +2,7 @@ package org.hhplus.ecommerce.cash.service;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.hhplus.ecommerce.cash.entity.CashHistory;
+import org.hhplus.ecommerce.cash.infra.jpa.CashHistory;
 
 @Getter
 public class CashHistoryDomain {

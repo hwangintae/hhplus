@@ -1,15 +1,13 @@
 package org.hhplus.ecommerce.orders.service;
 
 import lombok.RequiredArgsConstructor;
-import org.hhplus.ecommerce.orders.entity.*;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.hhplus.ecommerce.orders.infra.jpa.OrderItem;
+import org.hhplus.ecommerce.orders.infra.jpa.Orders;
+import org.hhplus.ecommerce.orders.infra.repository.OrderItemRepository;
+import org.hhplus.ecommerce.orders.infra.repository.OrdersRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -19,12 +17,13 @@ public class OrdersService {
 
     private final OrdersRepository ordersRepository;
     private final OrderItemRepository orderItemRepository;
-    private final TopOrderItemRepository topOrderItemRepository;
 
     public List<OrderItemDomain> getOrders(Long userId) {
         List<Orders> orders = ordersRepository.findByUserId(userId);
 
-        List<Long> ordersIds = orders.stream().map(Orders::getId).toList();
+        List<Long> ordersIds = orders.stream()
+                .map(Orders::getId)
+                .toList();
 
         List<OrderItem> orderItems = orderItemRepository.findByOrdersIdIn(ordersIds);
         return orderItems.stream()
@@ -48,46 +47,20 @@ public class OrdersService {
                         .build())
                 .toList();
 
-        List<OrderItem> orderItems = orderItemRepository.saveAll(orderItemDomains.stream()
+        List<OrderItem> orderItems = orderItemDomains.stream()
                 .map(OrderItemDomain::toEntity)
-                .toList());
+                .toList();
 
-        return orderItems.stream()
+        List<OrderItem> saves = orderItemRepository.save(orderItems);
+        return saves.stream()
                 .map(OrderItem::toDomain)
                 .toList();
     }
 
-    public List<TopOrderItemDomain> getTopFiveOrderItems(LocalDate today) {
-        List<TopOrderItem> topOrderItems = topOrderItemRepository.findByCreateDay(today);
-
-        return topOrderItems.stream()
-                .map(TopOrderItem::toDomain)
-                .sorted(Comparator.comparing(TopOrderItemDomain::getCnt).reversed()
-                        .thenComparing(TopOrderItemDomain::getId))
-                .toList();
+    public List<PopularItemsResult> getPopularItems(int from, int limit) {
+         return orderItemRepository.findPopularItems(from, limit);
     }
 
-    @Scheduled(cron = "1 0 0 * * *")
-    public void createTopFiveOrderItem() {
 
-        LocalDate now = LocalDate.now();
-        LocalDateTime endDateTime = now.atTime(LocalTime.MIDNIGHT);
-        LocalDateTime startDateTime = endDateTime.minusDays(3);
 
-        List<OrderItem> topFiveDuringThreeDays = orderItemRepository.findTopFiveDuringThreeDays(startDateTime, endDateTime);
-
-        List<TopOrderItemDomain> resultDomains = topFiveDuringThreeDays.stream()
-                .map(item -> TopOrderItemDomain.builder()
-                        .createDay(now)
-                        .itemId(item.getItemId())
-                        .cnt(item.getItemCnt())
-                        .build())
-                .toList();
-
-        List<TopOrderItem> result = resultDomains.stream()
-                .map(TopOrderItemDomain::toEntity)
-                .toList();
-
-        topOrderItemRepository.saveAll(result);
-    }
 }

@@ -2,6 +2,8 @@ package org.hhplus.ecommerce.common;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hhplus.ecommerce.common.exception.EcommerceException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -9,11 +11,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ApiControllerAdvice {
 
-    @ExceptionHandler(EcommerceException.class)
-    public RestApiResponse<String> handleEcommerceException(EcommerceException e) {
+    @ExceptionHandler(EmptyResultDataAccessException.class)
+    public RestApiResponse<String> handleEmptyResultDataAccessException(EmptyResultDataAccessException e) {
 
-        log.error(">>> handleEcommerceException: {}", e.getMessage());
+        log.warn(">>> EmptyResultDataAccessException : {}", e.getMessage());
 
-        return RestApiResponse.error(e.getCode(), e.getMessage());
+        return RestApiResponse.error(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public RestApiResponse<String> handleIllegalArgumentException(IllegalArgumentException e) {
+
+        log.warn(">>> IllegalArgumentException : {}", e.getMessage());
+
+        return RestApiResponse.error(HttpStatus.BAD_REQUEST.value(), e.getMessage());
     }
 }
