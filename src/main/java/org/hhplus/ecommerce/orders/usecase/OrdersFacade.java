@@ -3,6 +3,7 @@ package org.hhplus.ecommerce.orders.usecase;
 import lombok.RequiredArgsConstructor;
 import org.hhplus.ecommerce.cash.service.CashRequest;
 import org.hhplus.ecommerce.cash.service.CashService;
+import org.hhplus.ecommerce.dataPlatform.DataPlatformService;
 import org.hhplus.ecommerce.item.service.ItemDomain;
 import org.hhplus.ecommerce.item.service.ItemService;
 import org.hhplus.ecommerce.item.service.StockService;
@@ -24,6 +25,7 @@ public class OrdersFacade {
     private final CashService cashService;
     private final ItemService itemService;
     private final StockService stockService;
+    private final DataPlatformService dataPlatformService;
 
     @Transactional
     public List<OrderItemDomain> createOrder(Long userId, List<OrderRequest> orderRequests) {
@@ -95,6 +97,10 @@ public class OrdersFacade {
                 .toList();
 
         // 주문 상품 등록
-        return ordersService.createOrders(userId, realOrderRequests);
+        List<OrderItemDomain> orders = ordersService.createOrders(userId, realOrderRequests);
+
+        dataPlatformService.sendData(orders);
+
+        return orders;
     }
 }
