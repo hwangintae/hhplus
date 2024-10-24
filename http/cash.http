@@ -8,5 +8,5 @@ Content-Type: application/json
 
 {
   "userId": "2",
-  "amount": "1000"
+  "amount": "10000"
 }
