@@ -2,7 +2,7 @@ package org.hhplus.ecommerce.orders.service;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.hhplus.ecommerce.orders.entity.Orders;
+import org.hhplus.ecommerce.orders.infra.jpa.Orders;
 import org.hhplus.ecommerce.orders.usecase.OrderStatus;
 
 @Getter

@@ -1,4 +1,4 @@
-package org.hhplus.ecommerce.orders.entity;
+package org.hhplus.ecommerce.orders.infra.jpa;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
