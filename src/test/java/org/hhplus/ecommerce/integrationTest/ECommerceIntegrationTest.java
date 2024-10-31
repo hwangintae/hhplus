@@ -79,7 +79,7 @@ public class ECommerceIntegrationTest extends IntegrationTestSupport {
         // when
         CompletableFuture.allOf(
                 LongStream.rangeClosed(1, 30)
-                        .mapToObj(idx -> CompletableFuture.runAsync(() -> cashService.addCash(cashRequest)))
+                        .mapToObj(idx -> CompletableFuture.runAsync(() -> cashFacade.addCash(cashRequest)))
                         .toArray(CompletableFuture[]::new)
         ).join();
 
