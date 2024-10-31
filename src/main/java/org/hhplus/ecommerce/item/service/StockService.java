@@ -31,12 +31,13 @@ public class StockService {
     }
 
     @Transactional
-    public void subStock(Long itemId, int cnt) {
+    public StockDomain subStock(Long itemId, int cnt) {
         StockDomain stockDomain = getStock(itemId);
 
         stockDomain.subQuantity(cnt);
 
-        stockRepository.save(stockDomain.toEntity());
+        return stockRepository.save(stockDomain.toEntity())
+                .toDomain();
     }
 
     public boolean checkStock(Long itemId, int cnt) {

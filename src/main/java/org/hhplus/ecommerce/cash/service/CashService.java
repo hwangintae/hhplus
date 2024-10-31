@@ -3,8 +3,6 @@ package org.hhplus.ecommerce.cash.service;
 import lombok.RequiredArgsConstructor;
 import org.hhplus.ecommerce.cash.infra.jpa.Cash;
 import org.hhplus.ecommerce.cash.infra.jpa.CashHistory;
-import org.hhplus.ecommerce.cash.infra.jpa.CashHistoryJpaRepository;
-import org.hhplus.ecommerce.cash.infra.jpa.CashJpaRepository;
 import org.hhplus.ecommerce.cash.infra.repository.CashHistoryRepository;
 import org.hhplus.ecommerce.cash.infra.repository.CashRepository;
 import org.springframework.stereotype.Service;
@@ -15,8 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class CashService {
 
     private final CashRepository cashRepository;
-    private final CashJpaRepository cashJpaRepository;
-    private final CashHistoryJpaRepository cashHistoryJpaRepository;
     private final CashHistoryRepository cashHistoryRepository;
 
     @Transactional

@@ -6,6 +6,7 @@ import org.hhplus.ecommerce.cart.usecase.CartFacade;
 import org.hhplus.ecommerce.cash.infra.jpa.CashHistoryJpaRepository;
 import org.hhplus.ecommerce.cash.infra.jpa.CashJpaRepository;
 import org.hhplus.ecommerce.cash.service.CashService;
+import org.hhplus.ecommerce.cash.usecase.CashFacade;
 import org.hhplus.ecommerce.item.infra.jpa.ItemJpaRepository;
 import org.hhplus.ecommerce.item.infra.jpa.StockJpaRepository;
 import org.hhplus.ecommerce.item.service.StockService;
@@ -20,18 +21,26 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 @SpringBootTest
 @Testcontainers
 @ActiveProfiles("test")
 public abstract class IntegrationTestSupport {
 
+    private static final int REDIS_PORT = 6379;
+
     public static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0");
+    public static GenericContainer redisContainer = new GenericContainer(DockerImageName.parse("redis:latest"))
+            .withExposedPorts(6379)
+            .withReuse(true);
 
     static {
         mysqlContainer.start();
+        redisContainer.start();
     }
 
     @DynamicPropertySource
@@ -39,6 +48,9 @@ public abstract class IntegrationTestSupport {
         registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
         registry.add("spring.datasource.username", mysqlContainer::getUsername);
         registry.add("spring.datasource.password", mysqlContainer::getPassword);
+
+        registry.add("spring.data.redis.host", redisContainer::getHost);
+        registry.add("spring.data.redis.port", () -> String.valueOf(redisContainer.getMappedPort(REDIS_PORT)));
     }
 
     @Autowired
@@ -82,6 +94,9 @@ public abstract class IntegrationTestSupport {
 
     @Autowired
     protected CartItemJpaRepository cartItemJpaRepository;
+
+    @Autowired
+    protected CashFacade cashFacade;
 
     @AfterEach
     void tearDown() {
