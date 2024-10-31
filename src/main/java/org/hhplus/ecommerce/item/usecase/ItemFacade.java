@@ -1,13 +1,14 @@
 package org.hhplus.ecommerce.item.usecase;
 
 import lombok.RequiredArgsConstructor;
+import org.hhplus.ecommerce.common.DistributedLock;
 import org.hhplus.ecommerce.item.service.ItemDomain;
 import org.hhplus.ecommerce.item.service.ItemService;
 import org.hhplus.ecommerce.item.service.StockDomain;
 import org.hhplus.ecommerce.item.service.StockService;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -19,22 +20,27 @@ public class ItemFacade {
 
     private final ItemService itemService;
     private final StockService stockService;
+    private final DistributedLock distributedLock;
 
-    @Transactional
     public ItemResponse getItemWithStock(Long itemId) {
 
         ItemDomain itemDomain = itemService.getItem(itemId);
-        StockDomain stockDomain = stockService.getStock(itemId);
+        StockDomain stockDomain = distributedLock.redissonLock("stock:" + itemId, () -> stockService.getStock(itemId));
 
         return ItemResponse.of(itemDomain, stockDomain);
     }
 
     // 상품목록 조회
-    @Transactional
-    public List<ItemResponse> getItemsWithStock(List<Long> itemId) {
+    public List<ItemResponse> getItemsWithStock(List<Long> itemIds) {
 
-        List<ItemDomain> itemDomains = itemService.getItems(itemId);
-        List<StockDomain> stockDomains = stockService.getStocks(itemId);
+        List<ItemDomain> itemDomains = itemService.getItems(itemIds);
+
+        List<StockDomain> stockDomains = new ArrayList<>();
+        for (Long itemId : itemIds) {
+            StockDomain stockDomain = distributedLock.redissonLock("stock:" + itemId, () -> stockService.getStock(itemId));
+
+            stockDomains.add(stockDomain);
+        }
 
         Map<Long, StockDomain> stockDomainMap = stockDomains.stream()
                 .collect(toMap(StockDomain::getItemId, stockDomain -> stockDomain));
