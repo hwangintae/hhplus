@@ -1,121 +1,28 @@
 package org.hhplus.ecommerce.integrationTest;
 
-import org.assertj.core.api.Assertions;
-import org.hhplus.ecommerce.cart.infra.jpa.CartItemJpaRepository;
-import org.hhplus.ecommerce.cart.infra.jpa.CartJpaRepository;
-import org.hhplus.ecommerce.cart.usecase.CartFacade;
 import org.hhplus.ecommerce.cash.infra.jpa.Cash;
-import org.hhplus.ecommerce.cash.infra.jpa.CashHistoryJpaRepository;
-import org.hhplus.ecommerce.cash.infra.jpa.CashJpaRepository;
 import org.hhplus.ecommerce.cash.service.CashDomain;
 import org.hhplus.ecommerce.cash.service.CashRequest;
-import org.hhplus.ecommerce.cash.service.CashService;
 import org.hhplus.ecommerce.item.infra.jpa.Item;
-import org.hhplus.ecommerce.item.infra.jpa.ItemJpaRepository;
 import org.hhplus.ecommerce.item.infra.jpa.Stock;
-import org.hhplus.ecommerce.item.infra.jpa.StockJpaRepository;
 import org.hhplus.ecommerce.item.service.StockDomain;
-import org.hhplus.ecommerce.item.service.StockService;
-import org.hhplus.ecommerce.orders.infra.jpa.OrderItemJpaRepository;
-import org.hhplus.ecommerce.orders.infra.jpa.OrdersJpaRepository;
+import org.hhplus.ecommerce.orders.service.OrderItemDomain;
 import org.hhplus.ecommerce.orders.service.OrderRequest;
-import org.hhplus.ecommerce.orders.service.OrdersService;
 import org.hhplus.ecommerce.orders.service.PopularItemsResult;
-import org.hhplus.ecommerce.orders.usecase.OrdersFacade;
 import org.hhplus.ecommerce.user.entity.User;
-import org.hhplus.ecommerce.user.entity.UserRepository;
-import org.junit.ClassRule;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
-@SpringBootTest
-@Testcontainers
-public class ECommerceIntegrationTest {
-
-    @ClassRule
-    @Container
-    public static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("db_commerce_srv")
-            .withUsername("us_hhplus_commerce")
-            .withPassword("commerce!#24");
-
-    @DynamicPropertySource
-    static void setUpProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", mysqlContainer::getUsername);
-        registry.add("spring.datasource.password", mysqlContainer::getPassword);
-    }
-
-    @Autowired
-    protected OrdersFacade ordersFacade;
-
-    @Autowired
-    protected OrdersService ordersService;
-
-    @Autowired
-    protected CashService cashService;
-
-    @Autowired
-    protected StockService stockService;
-
-    @Autowired
-    protected OrdersJpaRepository ordersJpaRepository;
-
-    @Autowired
-    protected OrderItemJpaRepository orderItemJpaRepository;
-
-    @Autowired
-    protected CashJpaRepository cashJpaRepository;
-
-    @Autowired
-    protected ItemJpaRepository itemJpaRepository;
-
-    @Autowired
-    protected CashHistoryJpaRepository cashHistoryJpaRepository;
-
-    @Autowired
-    protected StockJpaRepository stockJpaRepository;
-
-    @Autowired
-    protected UserRepository userRepository;
-
-    @Autowired
-    protected CartFacade cartFacade;
-
-    @Autowired
-    protected CartJpaRepository cartJpaRepository;
-
-    @Autowired
-    protected CartItemJpaRepository cartItemJpaRepository;
-
-    @AfterEach
-    void tearDown() {
-        ordersJpaRepository.deleteAll();
-        orderItemJpaRepository.deleteAll();
-        cashJpaRepository.deleteAll();
-        itemJpaRepository.deleteAll();
-        cashHistoryJpaRepository.deleteAll();
-        stockJpaRepository.deleteAll();
-        userRepository.deleteAll();
-        cartJpaRepository.deleteAll();
-        cartItemJpaRepository.deleteAll();
-    }
+public class ECommerceIntegrationTest extends IntegrationTestSupport {
 
     @Test
     @DisplayName("한명의 사용자가 동시에 여러번 주문 했을 경우 동시성 제어 테스트")
@@ -184,7 +91,7 @@ public class ECommerceIntegrationTest {
 
     @Test
     @DisplayName("최근 3일 간 가장 많이 팔린 상품 5개 찾기")
-    @Sql({"OrderItemTestDataSet.sql"})
+    @Sql(scripts = "/OrderItemTestDataSet.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     public void getPopularItems3DaysLimit5() {
         // given
         int from = 3;
@@ -193,12 +100,87 @@ public class ECommerceIntegrationTest {
         // when
         List<PopularItemsResult> popularItems = ordersService.getPopularItems(from, limit);
         // then
-        Assertions.assertThat(popularItems)
+        assertThat(popularItems)
                 .extracting("itemId", "totalCnt")
                 .contains(
                         tuple(100L, 50),
                         tuple(101L, 25)
                 );
+    }
+
+    @Test
+    @DisplayName("사용자 a는 1번, 2번, 3번, 4번, 5번 상품 구매, 사용자 b는 5번, 4번, 3번, 2번, 1번 구매 했을 때 동시성 제어")
+    public void userABuy1to5AndUserBBuy5to1() {
+        // given
+        Long userIdA = 10L;
+        Long userIdB = 11L;
+
+        Long userAmount = 1_000_000_000L;
+        int itemPrice = 100;
+        int quantity = 3_000;
+
+
+        cashJpaRepository.save(Cash.builder().userId(userIdA).amount(userAmount).build());
+        cashJpaRepository.save(Cash.builder().userId(userIdB).amount(userAmount).build());
+
+        Item item1 = itemJpaRepository.save(Item.builder().price(itemPrice).build());
+        Item item2 = itemJpaRepository.save(Item.builder().price(itemPrice).build());
+        Item item3 = itemJpaRepository.save(Item.builder().price(itemPrice).build());
+        Item item4 = itemJpaRepository.save(Item.builder().price(itemPrice).build());
+        Item item5 = itemJpaRepository.save(Item.builder().price(itemPrice).build());
+
+        stockJpaRepository.save(Stock.builder().itemId(item1.getId()).quantity(quantity).build());
+        stockJpaRepository.save(Stock.builder().itemId(item2.getId()).quantity(quantity).build());
+        stockJpaRepository.save(Stock.builder().itemId(item3.getId()).quantity(quantity).build());
+        stockJpaRepository.save(Stock.builder().itemId(item4.getId()).quantity(quantity).build());
+        stockJpaRepository.save(Stock.builder().itemId(item5.getId()).quantity(quantity).build());
+
+        List<OrderRequest> userAOrderRequests = List.of(
+                OrderRequest.builder().itemId(item1.getId()).cnt(1).build(),
+                OrderRequest.builder().itemId(item2.getId()).cnt(1).build(),
+                OrderRequest.builder().itemId(item3.getId()).cnt(1).build(),
+                OrderRequest.builder().itemId(item4.getId()).cnt(1).build(),
+                OrderRequest.builder().itemId(item5.getId()).cnt(1).build()
+        );
+
+        List<OrderRequest> userBOrderRequests = List.of(
+                OrderRequest.builder().itemId(item5.getId()).cnt(1).build(),
+                OrderRequest.builder().itemId(item4.getId()).cnt(1).build(),
+                OrderRequest.builder().itemId(item3.getId()).cnt(1).build(),
+                OrderRequest.builder().itemId(item2.getId()).cnt(1).build(),
+                OrderRequest.builder().itemId(item1.getId()).cnt(1).build()
+        );
+
+        // when
+        CompletableFuture.allOf(
+                IntStream.rangeClosed(1, 100)
+                        .mapToObj(idx -> CompletableFuture.runAsync(() -> {
+                                    ordersFacade.createOrder(userIdA, userAOrderRequests);
+                                    ordersFacade.createOrder(userIdB, userBOrderRequests);
+                                })
+                        ).toArray(CompletableFuture[]::new)
+        ).join();
+
+        // then
+        // 재고 차감 확인
+        assertThat(stockService.getStock(item1.getId()).getQuantity()).isEqualTo(quantity - 200);
+        assertThat(stockService.getStock(item2.getId()).getQuantity()).isEqualTo(quantity - 200);
+        assertThat(stockService.getStock(item3.getId()).getQuantity()).isEqualTo(quantity - 200);
+        assertThat(stockService.getStock(item4.getId()).getQuantity()).isEqualTo(quantity - 200);
+        assertThat(stockService.getStock(item5.getId()).getQuantity()).isEqualTo(quantity - 200);
+
+        // 사용자 금액 확인
+        assertThat(cashService.getCash(userIdA).getAmount()).isEqualTo(userAmount - (itemPrice * 5 * itemPrice));
+        assertThat(cashService.getCash(userIdB).getAmount()).isEqualTo(userAmount - (itemPrice * 5 * itemPrice));
+
+        // 사용자 주문 확인
+        List<OrderItemDomain> userAOrders = ordersService.getOrders(userIdA);
+
+        Integer userAItemCnt = userAOrders.stream().map(OrderItemDomain::getItemCnt).reduce(0, Integer::sum);
+        Integer userBItemCnt = userAOrders.stream().map(OrderItemDomain::getItemCnt).reduce(0, Integer::sum);
+
+        assertThat(userAItemCnt).isEqualTo(500);
+        assertThat(userBItemCnt).isEqualTo(500);
     }
 
 
