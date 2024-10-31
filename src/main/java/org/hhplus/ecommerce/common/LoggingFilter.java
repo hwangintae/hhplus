@@ -32,12 +32,20 @@ public class LoggingFilter extends OncePerRequestFilter {
 
         long endTime = System.currentTimeMillis();
 
+        String logMessage = String.format(
+                ">>> Method: %s, URI: %s, Time: %.5f seconds%n" +
+                ">>>>>> Headers: %s%n" +
+                ">>>>>> Query String: %s%n" +
+                ">>>>>> Request Body: %s%n" +
+                ">>> Response Status: %s, Response Body: %s",
+                requestWrapper.getMethod(), requestWrapper.getRequestURI(), (endTime - startTime) / 1000.0,
+                getHeaders(requestWrapper),
+                requestWrapper.getQueryString(),
+                getRequestBody(requestWrapper),
+                HttpStatus.valueOf(responseWrapper.getStatus()), getResponseBody(responseWrapper)
+        );
 
-        log.info(">>> {} {} {}", requestWrapper.getMethod(), requestWrapper.getRequestURI(), String.format("%.5f", (endTime - startTime) / 1000.0));
-        log.info(">>>>>> headers: {}", getHeaders(requestWrapper));
-        log.info(">>>>>> queryString: {}", requestWrapper.getQueryString());
-        log.info(">>>>>> requestBody: {}", getRequestBody(requestWrapper));
-        log.info(">>> {} {}", HttpStatus.valueOf(responseWrapper.getStatus()), getResponseBody(responseWrapper));
+        log.info(logMessage);
 
         responseWrapper.copyBodyToResponse();
     }

@@ -1,93 +1,22 @@
 package org.hhplus.ecommerce.orders.usecase;
 
 import org.hhplus.ecommerce.cash.infra.jpa.Cash;
-import org.hhplus.ecommerce.cash.infra.jpa.CashHistoryJpaRepository;
-import org.hhplus.ecommerce.cash.infra.jpa.CashJpaRepository;
 import org.hhplus.ecommerce.cash.service.CashDomain;
-import org.hhplus.ecommerce.cash.service.CashService;
+import org.hhplus.ecommerce.integrationTest.IntegrationTestSupport;
 import org.hhplus.ecommerce.item.infra.jpa.Item;
-import org.hhplus.ecommerce.item.infra.jpa.ItemJpaRepository;
 import org.hhplus.ecommerce.item.infra.jpa.Stock;
-import org.hhplus.ecommerce.item.infra.jpa.StockJpaRepository;
-import org.hhplus.ecommerce.orders.infra.jpa.OrderItemJpaRepository;
-import org.hhplus.ecommerce.orders.infra.jpa.OrdersJpaRepository;
 import org.hhplus.ecommerce.orders.service.OrderItemDomain;
 import org.hhplus.ecommerce.orders.service.OrderRequest;
 import org.hhplus.ecommerce.user.entity.User;
-import org.hhplus.ecommerce.user.entity.UserRepository;
-import org.junit.ClassRule;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
-@SpringBootTest
-@Testcontainers
-class OrdersFacadeTest {
-
-    @ClassRule
-    @Container
-    public static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("db_commerce_srv")
-            .withUsername("us_hhplus_commerce")
-            .withPassword("commerce!#24");
-
-    @DynamicPropertySource
-    static void setUpProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", mysqlContainer::getUsername);
-        registry.add("spring.datasource.password", mysqlContainer::getPassword);
-    }
-
-    @Autowired
-    private OrdersFacade ordersFacade;
-
-    @Autowired
-    private CashService cashService;
-
-    @Autowired
-    private OrdersJpaRepository ordersJpaRepository;
-
-    @Autowired
-    private OrderItemJpaRepository orderItemJpaRepository;
-
-    @Autowired
-    private CashJpaRepository cashJpaRepository;
-
-    @Autowired
-    private ItemJpaRepository itemJpaRepository;
-
-    @Autowired
-    private CashHistoryJpaRepository cashHistoryJpaRepository;
-
-    @Autowired
-    private StockJpaRepository stockJpaRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @AfterEach
-    void tearDown() {
-        ordersJpaRepository.deleteAll();
-        orderItemJpaRepository.deleteAll();
-        cashJpaRepository.deleteAll();
-        itemJpaRepository.deleteAll();
-        cashHistoryJpaRepository.deleteAll();
-        stockJpaRepository.deleteAll();
-        userRepository.deleteAll();
-    }
+class OrdersFacadeTest extends IntegrationTestSupport {
 
     @Test
     @DisplayName("상품을 주문할 때 재고가 있는 상품만 주문 된다.")
