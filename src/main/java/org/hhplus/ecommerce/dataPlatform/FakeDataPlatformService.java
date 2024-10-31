@@ -16,6 +16,6 @@ public class FakeDataPlatformService implements DataPlatformService {
 
         RestTemplate restTemplate = new RestTemplate();
 
-        restTemplate.getForObject("", String.class);
+//        restTemplate.getForObject("", String.class);
     }
 }
