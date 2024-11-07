@@ -1,15 +1,20 @@
 package org.hhplus.ecommerce.orders.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hhplus.ecommerce.orders.infra.jpa.OrderItem;
 import org.hhplus.ecommerce.orders.infra.jpa.Orders;
 import org.hhplus.ecommerce.orders.infra.repository.OrderItemRepository;
 import org.hhplus.ecommerce.orders.infra.repository.OrdersRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -57,10 +62,14 @@ public class OrdersService {
                 .toList();
     }
 
+    @Cacheable(value = "popularItemsCache", key = "#from + '_' + #limit", cacheManager = "redisCacheManager")
     public List<PopularItemsResult> getPopularItems(int from, int limit) {
          return orderItemRepository.findPopularItems(from, limit);
     }
 
-
-
+    @Scheduled(cron = "0 0 0 * * *")
+    @CacheEvict(value = "popularItemsCache", allEntries = true)
+    public void clearPopularItemsCache() {
+        log.info("clear Popular Items Cache");
+    }
 }
