@@ -1,6 +1,7 @@
 package org.hhplus.ecommerce.item.service;
 
 import lombok.RequiredArgsConstructor;
+import org.hhplus.ecommerce.common.redis.DistributedLock;
 import org.hhplus.ecommerce.item.infra.jpa.Stock;
 import org.hhplus.ecommerce.item.infra.repository.StockRepository;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class StockService {
                 .toList();
     }
 
+    @DistributedLock(prefix = "stock", key = "#itemId")
     @Transactional
     public StockDomain subStock(Long itemId, int cnt) {
         StockDomain stockDomain = getStock(itemId);

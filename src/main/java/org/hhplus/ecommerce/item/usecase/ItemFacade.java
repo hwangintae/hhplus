@@ -1,7 +1,6 @@
 package org.hhplus.ecommerce.item.usecase;
 
 import lombok.RequiredArgsConstructor;
-import org.hhplus.ecommerce.common.DistributedLock;
 import org.hhplus.ecommerce.item.service.ItemDomain;
 import org.hhplus.ecommerce.item.service.ItemService;
 import org.hhplus.ecommerce.item.service.StockDomain;
@@ -20,12 +19,11 @@ public class ItemFacade {
 
     private final ItemService itemService;
     private final StockService stockService;
-    private final DistributedLock distributedLock;
 
     public ItemResponse getItemWithStock(Long itemId) {
 
         ItemDomain itemDomain = itemService.getItem(itemId);
-        StockDomain stockDomain = distributedLock.redissonLock("stock:" + itemId, () -> stockService.getStock(itemId));
+        StockDomain stockDomain = stockService.getStock(itemId);
 
         return ItemResponse.of(itemDomain, stockDomain);
     }
@@ -37,7 +35,7 @@ public class ItemFacade {
 
         List<StockDomain> stockDomains = new ArrayList<>();
         for (Long itemId : itemIds) {
-            StockDomain stockDomain = distributedLock.redissonLock("stock:" + itemId, () -> stockService.getStock(itemId));
+            StockDomain stockDomain = stockService.getStock(itemId);
 
             stockDomains.add(stockDomain);
         }

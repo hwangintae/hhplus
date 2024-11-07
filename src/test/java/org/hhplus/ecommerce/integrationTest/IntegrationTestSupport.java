@@ -16,8 +16,10 @@ import org.hhplus.ecommerce.orders.service.OrdersService;
 import org.hhplus.ecommerce.orders.usecase.OrdersFacade;
 import org.hhplus.ecommerce.user.entity.UserRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -31,12 +33,8 @@ import org.testcontainers.utility.DockerImageName;
 @ActiveProfiles("test")
 public abstract class IntegrationTestSupport {
 
-    private static final int REDIS_PORT = 6379;
-
     public static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0");
-    public static GenericContainer redisContainer = new GenericContainer(DockerImageName.parse("redis:latest"))
-            .withExposedPorts(6379)
-            .withReuse(true);
+    public static RedisContainer redisContainer = new RedisContainer("redis:latest");
 
     static {
         mysqlContainer.start();
@@ -50,7 +48,7 @@ public abstract class IntegrationTestSupport {
         registry.add("spring.datasource.password", mysqlContainer::getPassword);
 
         registry.add("spring.data.redis.host", redisContainer::getHost);
-        registry.add("spring.data.redis.port", () -> String.valueOf(redisContainer.getMappedPort(REDIS_PORT)));
+        registry.add("spring.data.redis.port", redisContainer::getRedisPort);
     }
 
     @Autowired
