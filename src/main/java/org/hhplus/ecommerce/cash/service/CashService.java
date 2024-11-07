@@ -1,13 +1,16 @@
 package org.hhplus.ecommerce.cash.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hhplus.ecommerce.cash.infra.jpa.Cash;
 import org.hhplus.ecommerce.cash.infra.jpa.CashHistory;
 import org.hhplus.ecommerce.cash.infra.repository.CashHistoryRepository;
 import org.hhplus.ecommerce.cash.infra.repository.CashRepository;
+import org.hhplus.ecommerce.common.redis.DistributedLock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CashService {
@@ -21,8 +24,10 @@ public class CashService {
                 .toDomain();
     }
 
+    @DistributedLock(prefix = "cash", key = "#request.getUserId()")
     @Transactional
     public CashDomain addCash(CashRequest request) {
+        log.info(">>> addCashAop start");
 
         CashDomain cashDomain = cashRepository.findByUserId(request.getUserId())
                 .toDomain();
@@ -34,9 +39,11 @@ public class CashService {
         CashHistory cashHistory = CashHistory.generateChargeCashHistory(cash.getId(), request.getAmount());
         cashHistoryRepository.save(cashHistory);
 
+        log.info(">>> addCashAop end");
         return cash.toDomain();
     }
 
+    @DistributedLock(prefix = "cash", key = "#request.getUserId()")
     @Transactional
     public CashDomain subCash(CashRequest request) {
 

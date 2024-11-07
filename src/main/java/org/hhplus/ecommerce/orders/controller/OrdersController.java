@@ -10,6 +10,7 @@ import org.hhplus.ecommerce.dataPlatform.DataPlatformService;
 import org.hhplus.ecommerce.orders.service.OrderItemDomain;
 import org.hhplus.ecommerce.orders.service.OrderRequestsWithUserId;
 import org.hhplus.ecommerce.orders.service.OrdersService;
+import org.hhplus.ecommerce.orders.service.PopularItemsResult;
 import org.hhplus.ecommerce.orders.usecase.OrdersFacade;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,5 +60,15 @@ public class OrdersController {
                 .toList();
 
         return RestApiResponse.ok(orderResponses);
+    }
+
+    @GetMapping("/orders/popular")
+    public Object getPopularItems(@RequestParam int from, @RequestParam int limit) {
+        return ordersService.getPopularItems(from, limit);
+    }
+
+    @GetMapping("/orders/popular/clear")
+    public void clearPopularItems() {
+        ordersService.clearPopularItemsCache();
     }
 }

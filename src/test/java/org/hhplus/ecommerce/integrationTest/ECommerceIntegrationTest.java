@@ -183,5 +183,31 @@ public class ECommerceIntegrationTest extends IntegrationTestSupport {
         assertThat(userBItemCnt).isEqualTo(500);
     }
 
+    @Test
+    @DisplayName("DistributedLock Aop를 이용한 락 획득")
+    public void distributeAop() {
+        // given
+        User user = userRepository.save(User.builder().username("이석범").build());
+        Long userId = user.getId();
+        long initAmount = 1_000_000_000L;
+        long addAmount = 100_000_000L;
+
+        cashJpaRepository.save(Cash.builder()
+                .userId(userId)
+                .amount(initAmount)
+                .build());
+
+        CashRequest cashRequest = CashRequest.builder()
+                .userId(userId)
+                .amount(addAmount)
+                .build();
+
+        // when
+        CashDomain cashDomain = cashFacade.addCash(cashRequest);
+
+        // then
+        assertThat(cashDomain.getAmount()).isEqualTo(initAmount + addAmount);
+    }
+
 
 }

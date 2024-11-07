@@ -3,7 +3,6 @@ package org.hhplus.ecommerce.orders.usecase;
 import lombok.RequiredArgsConstructor;
 import org.hhplus.ecommerce.cash.service.CashRequest;
 import org.hhplus.ecommerce.cash.service.CashService;
-import org.hhplus.ecommerce.common.DistributedLock;
 import org.hhplus.ecommerce.dataPlatform.DataPlatformService;
 import org.hhplus.ecommerce.item.service.*;
 import org.hhplus.ecommerce.orders.service.OrderItemDomain;
@@ -25,7 +24,6 @@ public class OrdersFacade {
     private final ItemService itemService;
     private final StockService stockService;
     private final DataPlatformService dataPlatformService;
-    private final DistributedLock distributedLock;
     private final RestoreStockService restoreStockService;
 
     public List<OrderItemDomain> createOrder(Long userId, List<OrderRequest> orderRequests) {
@@ -60,15 +58,14 @@ public class OrdersFacade {
             int cnt = orderReqeustsMap.getOrDefault(itemId, 0);
 
             try {
-                distributedLock.redissonLock("stock:" + itemId, () -> stockService.subStock(itemId, cnt));
+                stockService.subStock(itemId, cnt);
 
                 tmpItemDomainAndCnts.add(new TmpItemDomainAndCnt(item, cnt));
             } catch (Exception e) {
                 tmpItemDomainAndCnts.forEach(itemDomainAndCnt -> {
                     Long tmpItemId = itemDomainAndCnt.getItemDomain().getId();
-                    distributedLock.redissonLock("stock:" + tmpItemId, () -> restoreStockService.addStock(tmpItemId, itemDomainAndCnt.getCnt()));
+                    restoreStockService.addStock(tmpItemId, itemDomainAndCnt.getCnt());
                 });
-
             }
         }
 
@@ -92,11 +89,11 @@ public class OrdersFacade {
 
         // 상품 결제
         try {
-            distributedLock.redissonLock("cash:" + cashRequest.getUserId(),() -> cashService.subCash(cashRequest));
+            cashService.subCash(cashRequest);
         } catch (Exception e) {
             tmpItemDomainAndCnts.forEach(itemDomainAndCnt -> {
                 Long tmpItemId = itemDomainAndCnt.getItemDomain().getId();
-                distributedLock.redissonLock("stock:" + tmpItemId, () -> restoreStockService.addStock(tmpItemId, itemDomainAndCnt.getCnt()));
+                restoreStockService.addStock(tmpItemId, itemDomainAndCnt.getCnt());
             });
         }
 
