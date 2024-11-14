@@ -1,0 +1,41 @@
+@startuml
+
+hide footbox
+autoactivate on
+
+actor "회원" as c
+
+
+participant "주문" as orders
+participant "재고" as stock
+participant "잔액" as cash
+participant "재고보상" as restoreStock
+participant "데이터 플랫폼" as dp
+
+c -> orders: 주문 요청
+
+alt 재고가 부족한 경우
+    orders -> stock: 재고 차감 요청
+    orders <<-- stock: 재고 부족 exception
+    orders -> restoreStock: 재고보상 요청
+    orders <<-- restoreStock: 재고 보상 결과
+else
+    orders -> stock: 재고 차감 요청
+    orders <<-- stock: 재고 차감 결과
+    alt 잔액이 부족한 경우
+        orders -> cash: 잔액 차감 요청
+        orders <<-- cash: 잔액 부족 exception
+        orders -> restoreStock: 재고보상 요청
+        orders <<-- restoreStock: 재고 보상 결과
+    else
+        orders -> cash: 잔액 차감 요청
+        orders <<-- cash: 잔액 차감 결과
+
+    end alt
+    opt 결제 성공
+        orders -->> dp: 주문 정보 등록 비동기 요청
+    end opt
+c <<-- orders:주문 결과
+
+end alt
+@enduml
