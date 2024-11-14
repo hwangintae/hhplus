@@ -2,7 +2,11 @@ package org.hhplus.ecommerce.orders.service;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.hhplus.ecommerce.orders.event.OrderingSuccessEvent;
 import org.hhplus.ecommerce.orders.infra.jpa.OrderItem;
+import org.hhplus.ecommerce.orders.usecase.OrderStatus;
+
+import java.time.LocalDate;
 
 @Getter
 public class OrderItemDomain {
@@ -11,14 +15,29 @@ public class OrderItemDomain {
     private final Long itemId;
     private final int itemCnt;
     private final boolean deleteAt;
+    private final LocalDate orderedAt;
+    private final OrderStatus status;
 
     @Builder
-    protected OrderItemDomain(Long id, Long ordersId, Long itemId, int itemCnt, boolean deleteAt) {
+    protected OrderItemDomain(Long id, Long ordersId, Long itemId, int itemCnt, boolean deleteAt, LocalDate orderedAt, OrderStatus status) {
         this.id = id;
         this.ordersId = ordersId;
         this.itemId = itemId;
         this.itemCnt = itemCnt;
         this.deleteAt = deleteAt;
+        this.orderedAt = orderedAt;
+        this.status = status;
+    }
+
+    public static OrderItemDomain generateOrderItemDomain(Long ordersId, Long itemId, int itemCnt) {
+        return OrderItemDomain.builder()
+                .ordersId(ordersId)
+                .itemId(itemId)
+                .itemCnt(itemCnt)
+                .deleteAt(false)
+                .orderedAt(LocalDate.now())
+                .status(OrderStatus.ORDERING)
+                .build();
     }
 
     public OrderItem toEntity() {
@@ -27,6 +46,20 @@ public class OrderItemDomain {
                 .ordersId(this.ordersId)
                 .itemId(this.itemId)
                 .itemCnt(this.itemCnt)
+                .deleteAt(this.deleteAt)
+                .orderedAt(this.orderedAt)
+                .status(this.status)
+                .build();
+    }
+
+    public OrderItemRequest toRequest() {
+        return OrderItemRequest.builder()
+                .orderItemId(this.id)
+                .ordersId(this.ordersId)
+                .itemId(this.itemId)
+                .itemCnt(this.itemCnt)
+                .orderedAt(this.orderedAt)
+                .status(this.status)
                 .build();
     }
 }

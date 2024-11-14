@@ -45,9 +45,12 @@ public class DistributedLockAop {
         } catch (Exception e) {
             throw new RuntimeException("RLock Exception : " + e.getMessage());
         } finally {
-            if (lock != null && lock.isHeldByCurrentThread()) {
-                lock.unlock();
-                log.info(">>> DistributedLock redis lock end : {}", key);
+            if (lock != null) {
+                try {
+                    lock.unlock();
+                } catch (IllegalMonitorStateException e) {
+                    log.info("Redisson Lock Already UnLock {} {}", method.getName(), key);
+                }
             }
         }
     }

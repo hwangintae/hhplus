@@ -1,10 +1,8 @@
 package org.hhplus.ecommerce.dataPlatform;
 
-import org.hhplus.ecommerce.orders.service.OrderItemDomain;
-
-import java.util.List;
+import org.hhplus.ecommerce.orders.event.OrderingSuccessEvent;
 
 public interface DataPlatformService {
 
-    void sendData(List<OrderItemDomain> orderItemDomains);
+    void sendData(OrderingSuccessEvent event);
 }

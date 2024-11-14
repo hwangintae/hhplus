@@ -2,6 +2,8 @@ package org.hhplus.ecommerce.orders.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hhplus.ecommerce.orders.event.OrderingSuccessEvent;
+import org.hhplus.ecommerce.orders.event.OrdersEventPublisher;
 import org.hhplus.ecommerce.orders.infra.jpa.OrderItem;
 import org.hhplus.ecommerce.orders.infra.jpa.Orders;
 import org.hhplus.ecommerce.orders.infra.repository.OrderItemRepository;
@@ -22,6 +24,7 @@ public class OrdersService {
 
     private final OrdersRepository ordersRepository;
     private final OrderItemRepository orderItemRepository;
+    private final OrdersEventPublisher ordersEventPublisher;
 
     public List<OrderItemDomain> getOrders(Long userId) {
         List<Orders> orders = ordersRepository.findByUserId(userId);
@@ -42,14 +45,13 @@ public class OrdersService {
 
         OrdersDomain ordersDomain = OrdersDomain.generateOrdersDomain(userId);
 
-        Orders orders = ordersRepository.save(ordersDomain.toEntity());
+        OrdersDomain saveOrdersDomain = ordersRepository.save(ordersDomain.toEntity()).toDomain();
 
         List<OrderItemDomain> orderItemDomains = orderRequests.stream()
-                .map(request -> OrderItemDomain.builder()
-                        .ordersId(orders.getId())
-                        .itemId(request.getItemId())
-                        .itemCnt(request.getCnt())
-                        .build())
+                .map(request -> OrderItemDomain.generateOrderItemDomain(
+                        saveOrdersDomain.getId(),
+                        request.getItemId(),
+                        request.getCnt()))
                 .toList();
 
         List<OrderItem> orderItems = orderItemDomains.stream()
@@ -57,14 +59,23 @@ public class OrdersService {
                 .toList();
 
         List<OrderItem> saves = orderItemRepository.save(orderItems);
-        return saves.stream()
+
+        List<OrderItemDomain> results = saves.stream()
                 .map(OrderItem::toDomain)
                 .toList();
+
+        List<OrderItemRequest> orderItemRequests = results.stream()
+                .map(OrderItemDomain::toRequest)
+                .toList();
+
+        ordersEventPublisher.success(new OrderingSuccessEvent(orderItemRequests));
+
+        return results;
     }
 
     @Cacheable(value = "popularItemsCache", key = "#from + '_' + #limit", cacheManager = "redisCacheManager")
     public List<PopularItemsResult> getPopularItems(int from, int limit) {
-         return orderItemRepository.findPopularItems(from, limit);
+        return orderItemRepository.findPopularItems(from, limit);
     }
 
     @Scheduled(cron = "0 0 0 * * *")

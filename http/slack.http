@@ -1,0 +1,7 @@
+### slack web hook bot test
+POST https://hooks.slack.com/services/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
+Content-Type: application/json
+
+{
+  "text": "intellij http Test!"
+}

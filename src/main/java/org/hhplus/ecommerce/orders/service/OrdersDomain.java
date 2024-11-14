@@ -10,19 +10,16 @@ public class OrdersDomain {
 
     private final Long id;
     private final Long userId;
-    private final OrderStatus status;
 
     @Builder
-    protected OrdersDomain(Long id, Long userId, OrderStatus status) {
+    protected OrdersDomain(Long id, Long userId) {
         this.id = id;
         this.userId = userId;
-        this.status = status;
     }
 
     public static OrdersDomain generateOrdersDomain(Long userId) {
         return OrdersDomain.builder()
                 .userId(userId)
-                .status(OrderStatus.SUCCESS)
                 .build();
     }
 
@@ -30,7 +27,6 @@ public class OrdersDomain {
         return Orders.builder()
                 .id(this.id)
                 .userId(this.userId)
-                .status(this.status)
                 .build();
     }
 }

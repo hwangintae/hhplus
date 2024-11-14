@@ -19,21 +19,16 @@ public class Orders {
 
     private Long userId;
 
-    @Enumerated(EnumType.STRING)
-    private OrderStatus status;
-
     @Builder
     protected Orders(Long id, Long userId, OrderStatus status) {
         this.id = id;
         this.userId = userId;
-        this.status = status;
     }
 
     public OrdersDomain toDomain() {
         return OrdersDomain.builder()
                 .id(this.id)
                 .userId(this.userId)
-                .status(this.status)
                 .build();
     }
 }
