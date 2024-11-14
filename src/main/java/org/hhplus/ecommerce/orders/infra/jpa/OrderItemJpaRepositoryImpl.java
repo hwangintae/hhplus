@@ -19,19 +19,26 @@ public class OrderItemJpaRepositoryImpl implements OrderItemJpaRepositoryDsl {
     @Override
     public List<PopularItemsResult> findPopularItems(int from, int limit) {
 
-        LocalDateTime now = LocalDate.now().atTime(LocalTime.MIDNIGHT);
-        LocalDateTime toDateTime = now.minusDays(1);
-        LocalDateTime fromDateTime = toDateTime.minusDays(from);
-
+        LocalDate now = LocalDate.now();
+        LocalDate toDate = now.minusDays(1);
+        LocalDate fromDate = toDate.minusDays(from);
 
         return jpaQueryFactory.select(Projections.constructor(PopularItemsResult.class,
                         orderItem.itemId,
                         orderItem.itemCnt.sum()))
                 .from(orderItem)
-                .where(orderItem.createdAt.between(fromDateTime, toDateTime))
+                .where(orderItem.orderedAt.between(fromDate, toDate))
                 .groupBy(orderItem.itemId)
                 .orderBy(orderItem.itemCnt.sum().desc())
                 .limit(limit)
+                .fetch();
+    }
+
+    @Override
+    public List<OrderItem> findLimitOffset(int limit, int offset) {
+        return jpaQueryFactory.selectFrom(orderItem)
+                .limit(limit)
+                .offset(offset)
                 .fetch();
     }
 }

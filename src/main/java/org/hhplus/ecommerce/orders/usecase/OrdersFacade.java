@@ -3,7 +3,6 @@ package org.hhplus.ecommerce.orders.usecase;
 import lombok.RequiredArgsConstructor;
 import org.hhplus.ecommerce.cash.service.CashRequest;
 import org.hhplus.ecommerce.cash.service.CashService;
-import org.hhplus.ecommerce.dataPlatform.DataPlatformService;
 import org.hhplus.ecommerce.item.service.*;
 import org.hhplus.ecommerce.orders.service.OrderItemDomain;
 import org.hhplus.ecommerce.orders.service.OrderRequest;
@@ -23,7 +22,6 @@ public class OrdersFacade {
     private final CashService cashService;
     private final ItemService itemService;
     private final StockService stockService;
-    private final DataPlatformService dataPlatformService;
     private final RestoreStockService restoreStockService;
 
     public List<OrderItemDomain> createOrder(Long userId, List<OrderRequest> orderRequests) {
@@ -40,17 +38,6 @@ public class OrdersFacade {
         // 상품 ID, 상품 명, 상품 가격, 재고 목록
         List<ItemDomain> itemDomains = itemService.getItems(itemIds);
 
-        // 구매가 가능한 상품 목록
-        // 재고가 있는지 확인
-//        List<ItemDomain> notOverQuantityItemDomains = itemDomains.stream()
-//                .filter(itemDomain -> {
-//                    Long itemId = itemDomain.getId();
-//                    int cnt = orderReqeustsMap.getOrDefault(itemId, -Integer.MAX_VALUE);
-//
-//                    return stockService.checkStock(itemId, cnt);
-//                })
-//                .toList();
-
         // 재고 차감
         List<TmpItemDomainAndCnt> tmpItemDomainAndCnts = new ArrayList<>();
         for (ItemDomain item : itemDomains) {
@@ -61,11 +48,7 @@ public class OrdersFacade {
                 stockService.subStock(itemId, cnt);
 
                 tmpItemDomainAndCnts.add(new TmpItemDomainAndCnt(item, cnt));
-            } catch (Exception e) {
-                tmpItemDomainAndCnts.forEach(itemDomainAndCnt -> {
-                    Long tmpItemId = itemDomainAndCnt.getItemDomain().getId();
-                    restoreStockService.addStock(tmpItemId, itemDomainAndCnt.getCnt());
-                });
+            } catch (Exception ignore) {
             }
         }
 
@@ -95,6 +78,8 @@ public class OrdersFacade {
                 Long tmpItemId = itemDomainAndCnt.getItemDomain().getId();
                 restoreStockService.addStock(tmpItemId, itemDomainAndCnt.getCnt());
             });
+
+            throw new RuntimeException("상품 결제에 실패했어요.");
         }
 
         // 주문 상품 목록
@@ -114,10 +99,6 @@ public class OrdersFacade {
                 .toList();
 
         // 주문 상품 등록
-        List<OrderItemDomain> orders = ordersService.createOrders(userId, realOrderRequests);
-
-        dataPlatformService.sendData(orders);
-
-        return orders;
+        return ordersService.createOrders(userId, realOrderRequests);
     }
 }

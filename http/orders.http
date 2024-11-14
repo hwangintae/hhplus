@@ -20,3 +20,30 @@ GET http://localhost:8080/api/orders/popular?from=6&limit=6
 
 ### 상위 상품 캐시 클리어
 GET http://localhost:8080/api/orders/popular/clear
+
+
+### 주문 목록 조회
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "orderRequests": [
+    {
+      "itemId": 1,
+      "cnt": 1
+    },
+    {
+      "itemId": 2,
+      "cnt": 1
+    },
+    {
+      "itemId": 3,
+      "cnt": 1
+    }
+  ]
+}
+
+
+### 이벤트 테스트
+GET http://localhost:8080/test

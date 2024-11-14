@@ -1,7 +1,7 @@
 package org.hhplus.ecommerce.orders.usecase;
 
 public enum OrderStatus {
-    SUCCESS, CANCEL, FAIL;
+    ORDERING, SUCCESS, CANCEL, FAIL;
 
     private int code;
 }

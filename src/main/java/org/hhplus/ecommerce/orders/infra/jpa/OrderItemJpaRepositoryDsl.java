@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface OrderItemJpaRepositoryDsl {
     List<PopularItemsResult> findPopularItems(int from, int limit);
+    List<OrderItem> findLimitOffset(int limit, int offset);
 }

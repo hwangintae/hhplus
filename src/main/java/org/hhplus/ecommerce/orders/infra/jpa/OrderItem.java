@@ -10,6 +10,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hhplus.ecommerce.common.BaseEntity;
 import org.hhplus.ecommerce.orders.service.OrderItemDomain;
+import org.hhplus.ecommerce.orders.usecase.OrderStatus;
+
+import java.time.LocalDate;
 
 @Getter
 @Entity
@@ -28,13 +31,19 @@ public class OrderItem extends BaseEntity {
 
     private boolean deleteAt;
 
+    private LocalDate orderedAt;
+
+    private OrderStatus status;
+
     @Builder
-    protected OrderItem(Long id, Long ordersId, Long itemId, int itemCnt, boolean deleteAt) {
+    protected OrderItem(Long id, Long ordersId, Long itemId, int itemCnt, boolean deleteAt, LocalDate orderedAt, OrderStatus status) {
         this.id = id;
         this.ordersId = ordersId;
         this.itemId = itemId;
         this.itemCnt = itemCnt;
         this.deleteAt = deleteAt;
+        this.orderedAt = orderedAt;
+        this.status = status;
     }
 
     public OrderItemDomain toDomain() {
@@ -44,6 +53,8 @@ public class OrderItem extends BaseEntity {
                 .itemId(this.itemId)
                 .itemCnt(this.itemCnt)
                 .deleteAt(this.deleteAt)
+                .orderedAt(this.orderedAt)
+                .status(this.status)
                 .build();
     }
 }
