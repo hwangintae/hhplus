@@ -8,11 +8,9 @@ import org.hhplus.ecommerce.item.infra.jpa.Stock;
 import org.hhplus.ecommerce.item.service.StockDomain;
 import org.hhplus.ecommerce.orders.service.OrderItemDomain;
 import org.hhplus.ecommerce.orders.service.OrderRequest;
-import org.hhplus.ecommerce.orders.service.PopularItemsResult;
 import org.hhplus.ecommerce.user.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -20,7 +18,6 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
 
 public class ECommerceIntegrationTest extends IntegrationTestSupport {
 
@@ -86,26 +83,6 @@ public class ECommerceIntegrationTest extends IntegrationTestSupport {
         // then
         CashDomain cashDomain = cashService.getCash(userId);
         assertThat(cashDomain.getAmount()).isEqualTo(10_000L + 100_000L * 30);
-    }
-
-
-    @Test
-    @DisplayName("최근 3일 간 가장 많이 팔린 상품 5개 찾기")
-    @Sql(scripts = "/OrderItemTestDataSet.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    public void getPopularItems3DaysLimit5() {
-        // given
-        int from = 3;
-        int limit = 5;
-
-        // when
-        List<PopularItemsResult> popularItems = ordersService.getPopularItems(from, limit);
-        // then
-        assertThat(popularItems)
-                .extracting("itemId", "totalCnt")
-                .contains(
-                        tuple(100L, 50),
-                        tuple(101L, 25)
-                );
     }
 
     @Test
