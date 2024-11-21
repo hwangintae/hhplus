@@ -1,8 +1,8 @@
 package org.hhplus.ecommerce.dataPlatform;
 
-import org.hhplus.ecommerce.orders.event.OrderingSuccessEvent;
+import org.hhplus.ecommerce.orders.event.OrderPaySuccessEvent;
 
 public interface DataPlatformService {
 
-    void sendData(OrderingSuccessEvent event);
+    void sendData(OrderPaySuccessEvent event);
 }
