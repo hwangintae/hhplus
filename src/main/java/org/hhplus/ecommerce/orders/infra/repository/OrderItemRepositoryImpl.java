@@ -15,8 +15,18 @@ public class OrderItemRepositoryImpl implements OrderItemRepository {
     private final OrderItemJpaRepository orderItemJpaRepository;
 
     @Override
+    public List<OrderItem> findById(List<Long> ids) {
+        return orderItemJpaRepository.findAllById(ids);
+    }
+
+    @Override
     public List<OrderItem> findByOrdersIdIn(List<Long> ordersId) {
         return orderItemJpaRepository.findByOrdersIdIn(ordersId);
+    }
+
+    @Override
+    public List<OrderItem> findByOrdersId(Long ordersId) {
+        return orderItemJpaRepository.findByOrdersId(ordersId);
     }
 
     @Override
