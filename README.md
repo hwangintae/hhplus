@@ -10,6 +10,6 @@
 
 ### **`STEP 18_심화`**
 
-- [ ] 기존에 애플리케이션 이벤트를 카프카 메세지 발행으로 변경
-- [ ] 카프카의 발행이 실패하는 것을 방지하기 위해 Transactional Outbox Pattern를 적용
-- [ ] 카프카의 발행이 실패한 케이스에 대한 재처리를 구현 ( Scheduler or BatchProcess )
+- [x] 기존에 애플리케이션 이벤트를 카프카 메세지 발행으로 변경
+- [x] 카프카의 발행이 실패하는 것을 방지하기 위해 Transactional Outbox Pattern를 적용
+- [x] 카프카의 발행이 실패한 케이스에 대한 재처리를 구현 ( Scheduler or BatchProcess )
