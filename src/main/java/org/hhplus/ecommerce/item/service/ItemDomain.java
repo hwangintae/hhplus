@@ -24,4 +24,11 @@ public class ItemDomain {
                 .price(this.price)
                 .build();
     }
+
+    public ItemInfo toInfo() {
+        return ItemInfo.builder()
+                .itemId(this.id)
+                .price(this.price)
+                .build();
+    }
 }

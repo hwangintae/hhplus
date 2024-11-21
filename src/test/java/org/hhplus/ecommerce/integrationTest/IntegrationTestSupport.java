@@ -10,20 +10,19 @@ import org.hhplus.ecommerce.cash.usecase.CashFacade;
 import org.hhplus.ecommerce.item.infra.jpa.ItemJpaRepository;
 import org.hhplus.ecommerce.item.infra.jpa.StockJpaRepository;
 import org.hhplus.ecommerce.item.service.StockService;
+import org.hhplus.ecommerce.item.usecase.ItemFacade;
 import org.hhplus.ecommerce.orders.infra.jpa.OrderItemJpaRepository;
 import org.hhplus.ecommerce.orders.infra.jpa.OrdersJpaRepository;
+import org.hhplus.ecommerce.orders.infra.jpa.OrdersOutboxJpaRepository;
 import org.hhplus.ecommerce.orders.service.OrdersService;
-import org.hhplus.ecommerce.orders.usecase.OrdersFacade;
 import org.hhplus.ecommerce.user.entity.UserRepository;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
@@ -35,10 +34,12 @@ public abstract class IntegrationTestSupport {
 
     public static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0");
     public static RedisContainer redisContainer = new RedisContainer("redis:latest");
+    public static KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.1.13"));
 
     static {
         mysqlContainer.start();
         redisContainer.start();
+        kafkaContainer.start();
     }
 
     @DynamicPropertySource
@@ -49,10 +50,10 @@ public abstract class IntegrationTestSupport {
 
         registry.add("spring.data.redis.host", redisContainer::getHost);
         registry.add("spring.data.redis.port", redisContainer::getRedisPort);
-    }
 
-    @Autowired
-    protected OrdersFacade ordersFacade;
+        registry.add("spring.kafka.bootstrap-servers", kafkaContainer::getBootstrapServers);
+        registry.add("spring.kafka.producer.value-serializer", () -> "org.springframework.kafka.support.serializer.JsonSerializer");
+    }
 
     @Autowired
     protected OrdersService ordersService;
@@ -96,6 +97,12 @@ public abstract class IntegrationTestSupport {
     @Autowired
     protected CashFacade cashFacade;
 
+    @Autowired
+    protected OrdersOutboxJpaRepository ordersOutboxJpaRepository;
+
+    @Autowired
+    protected ItemFacade itemFacade;
+
     @AfterEach
     void tearDown() {
         ordersJpaRepository.deleteAll();
@@ -106,5 +113,6 @@ public abstract class IntegrationTestSupport {
         userRepository.deleteAll();
         cartJpaRepository.deleteAll();
         cartItemJpaRepository.deleteAll();
+        ordersOutboxJpaRepository.deleteAll();
     }
 }

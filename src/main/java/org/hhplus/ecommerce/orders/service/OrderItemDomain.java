@@ -2,9 +2,7 @@ package org.hhplus.ecommerce.orders.service;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.hhplus.ecommerce.orders.event.OrderingSuccessEvent;
 import org.hhplus.ecommerce.orders.infra.jpa.OrderItem;
-import org.hhplus.ecommerce.orders.usecase.OrderStatus;
 
 import java.time.LocalDate;
 
@@ -16,7 +14,7 @@ public class OrderItemDomain {
     private final int itemCnt;
     private final boolean deleteAt;
     private final LocalDate orderedAt;
-    private final OrderStatus status;
+    private OrderStatus status;
 
     @Builder
     protected OrderItemDomain(Long id, Long ordersId, Long itemId, int itemCnt, boolean deleteAt, LocalDate orderedAt, OrderStatus status) {
@@ -36,7 +34,7 @@ public class OrderItemDomain {
                 .itemCnt(itemCnt)
                 .deleteAt(false)
                 .orderedAt(LocalDate.now())
-                .status(OrderStatus.ORDERING)
+                .status(OrderStatus.INIT)
                 .build();
     }
 
@@ -52,14 +50,21 @@ public class OrderItemDomain {
                 .build();
     }
 
-    public OrderItemRequest toRequest() {
-        return OrderItemRequest.builder()
+    public OrderItemInfo toInfo() {
+        return OrderItemInfo.builder()
                 .orderItemId(this.id)
-                .ordersId(this.ordersId)
                 .itemId(this.itemId)
                 .itemCnt(this.itemCnt)
                 .orderedAt(this.orderedAt)
                 .status(this.status)
                 .build();
+    }
+
+    public void orderSuccess() {
+        this.status = OrderStatus.SUCCESS;
+    }
+
+    public void orderFail() {
+        this.status = OrderStatus.FAIL;
     }
 }

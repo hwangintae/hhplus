@@ -1,16 +1,13 @@
 package org.hhplus.ecommerce.orders.infra.jpa;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hhplus.ecommerce.common.BaseEntity;
 import org.hhplus.ecommerce.orders.service.OrderItemDomain;
-import org.hhplus.ecommerce.orders.usecase.OrderStatus;
+import org.hhplus.ecommerce.orders.service.OrderStatus;
 
 import java.time.LocalDate;
 
@@ -33,6 +30,7 @@ public class OrderItem extends BaseEntity {
 
     private LocalDate orderedAt;
 
+    @Enumerated(value = EnumType.STRING)
     private OrderStatus status;
 
     @Builder

@@ -27,4 +27,12 @@ public class ItemService {
                 .map(Item::toDomain)
                 .toList();
     }
+
+    public Long getPrice(List<Long> itemIds) {
+        List<Item> items = itemRepository.findByIdIn(itemIds);
+
+        return items.stream()
+                .map(Item::getPrice)
+                .reduce(0L, Long::sum);
+    }
 }

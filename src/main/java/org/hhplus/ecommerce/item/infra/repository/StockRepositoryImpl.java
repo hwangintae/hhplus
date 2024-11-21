@@ -31,4 +31,9 @@ public class StockRepositoryImpl implements StockRepository {
     public Stock save(Stock stock) {
         return stockJpaRepository.save(stock);
     }
+
+    @Override
+    public List<Stock> saveAll(List<Stock> stocks) {
+        return stockJpaRepository.saveAll(stocks);
+    }
 }

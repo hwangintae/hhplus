@@ -13,6 +13,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Aspect
@@ -29,25 +31,31 @@ public class DistributedLockAop {
         Method method = signature.getMethod();
         DistributedLock distributedLock = method.getAnnotation(DistributedLock.class);
 
-        String key = CustomSpringELParser.getDynamicValue(signature.getParameterNames(), joinPoint.getArgs(), distributedLock.prefix(), distributedLock.key());
-        RLock lock = redissonClient.getLock(key);
+        String key = CustomSpringELParser.getDynamicValue(signature.getParameterNames(), joinPoint.getArgs(), distributedLock.key());
+
+        RLock[] RLocks = Arrays.stream(key.split(","))
+                .map(item -> redissonClient.getLock(String.join("", distributedLock.prefix(), ":", item)))
+                .toArray(RLock[]::new);
+
+        RLock multiLock = redissonClient.getMultiLock(RLocks);
 
         try {
-            boolean available = lock.tryLock(distributedLock.waitTime(), distributedLock.leaseTime(), distributedLock.timeUnit());
+            boolean available = multiLock.tryLock(distributedLock.waitTime(), distributedLock.leaseTime(), distributedLock.timeUnit());
             if (!available) {
                 return false;
             }
 
-            log.info(">>> DistributedLock redis lock start : {}", key);
+            log.info(">>> MultiDistributedLock redis lock start : {}", key);
             return joinPoint.proceed();
         } catch (InterruptedException e) {
             throw new RuntimeException("RLock InterruptedException : " + e.getMessage());
         } catch (Exception e) {
             throw new RuntimeException("RLock Exception : " + e.getMessage());
         } finally {
-            if (lock != null) {
+            if (multiLock != null) {
                 try {
-                    lock.unlock();
+                    multiLock.unlock();
+                    log.info(">>> MultiDistributedLock redis lock end : {}", key);
                 } catch (IllegalMonitorStateException e) {
                     log.info("Redisson Lock Already UnLock {} {}", method.getName(), key);
                 }

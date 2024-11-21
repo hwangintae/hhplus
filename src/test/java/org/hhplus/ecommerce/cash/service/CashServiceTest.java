@@ -2,14 +2,15 @@ package org.hhplus.ecommerce.cash.service;
 
 import org.hhplus.ecommerce.cash.infra.jpa.Cash;
 import org.hhplus.ecommerce.cash.infra.repository.CashRepository;
-import org.hhplus.ecommerce.common.exception.EcommerceBadRequestException;
-import org.hhplus.ecommerce.common.exception.EcommerceErrors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hhplus.ecommerce.common.exception.EcommerceErrors.ILLEGAL_AMOUNT;
@@ -25,9 +26,12 @@ class CashServiceTest {
     @Mock
     private CashRepository cashRepository;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     @Test
     @DisplayName("잔액 사용 시, 충전된 금액 보다 많은 금액을 사용할 수 없다.")
-    public void subCashWithException() {
+    public void payWithException() {
         // given
         Long userId = 1L;
         int amount = 10;
@@ -46,7 +50,7 @@ class CashServiceTest {
         given(cashRepository.findByUserId(anyLong())).willReturn(cash);
 
         // expected
-        assertThatThrownBy(() -> cashService.subCash(cashRequest))
+        assertThatThrownBy(() -> cashService.pay(10L, cashRequest))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(INSUFFICIENT_USER_CASH.getMessage());
     }
@@ -91,14 +95,15 @@ class CashServiceTest {
         CashRequest cashRequest = CashRequest.builder()
                 .userId(userId)
                 .amount(0L)
+                .orderItemInfos(List.of())
                 .build();
 
         given(cashRepository.findByUserId(anyLong())).willReturn(cash);
 
         // expected
-        assertThatThrownBy(() -> cashService.subCash(cashRequest))
+        assertThatThrownBy(() -> cashService.pay(10L, cashRequest))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage(ILLEGAL_AMOUNT.getMessage());
+                .hasMessage(INSUFFICIENT_USER_CASH.getMessage());
     }
 
 }

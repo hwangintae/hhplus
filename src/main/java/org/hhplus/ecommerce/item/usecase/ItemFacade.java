@@ -5,6 +5,8 @@ import org.hhplus.ecommerce.item.service.ItemDomain;
 import org.hhplus.ecommerce.item.service.ItemService;
 import org.hhplus.ecommerce.item.service.StockDomain;
 import org.hhplus.ecommerce.item.service.StockService;
+import org.hhplus.ecommerce.orders.service.OrderItemInfo;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ public class ItemFacade {
 
     private final ItemService itemService;
     private final StockService stockService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public ItemResponse getItemWithStock(Long itemId) {
 
@@ -46,5 +49,15 @@ public class ItemFacade {
         return itemDomains.stream()
                 .map(itemDomain -> ItemResponse.of(itemDomain, stockDomainMap.get(itemDomain.getId())))
                 .toList();
+    }
+
+    public void subStockItem(Long userId, Long orderId, List<OrderItemInfo> orderItemInfos) {
+        List<Long> itemIds = orderItemInfos.stream()
+                .map(OrderItemInfo::getItemId)
+                .toList();
+
+        List<ItemDomain> itemDomains = itemService.getItems(itemIds);
+
+        stockService.subStocks(userId, orderId, orderItemInfos, itemDomains);
     }
 }

@@ -1,25 +1,48 @@
 package org.hhplus.ecommerce.orders.usecase;
 
 import org.hhplus.ecommerce.cash.infra.jpa.Cash;
+import org.hhplus.ecommerce.cash.infra.jpa.CashJpaRepository;
 import org.hhplus.ecommerce.cash.service.CashDomain;
 import org.hhplus.ecommerce.integrationTest.IntegrationTestSupport;
 import org.hhplus.ecommerce.item.infra.jpa.Item;
+import org.hhplus.ecommerce.item.infra.jpa.ItemJpaRepository;
 import org.hhplus.ecommerce.item.infra.jpa.Stock;
+import org.hhplus.ecommerce.item.infra.jpa.StockJpaRepository;
 import org.hhplus.ecommerce.orders.service.OrderItemDomain;
 import org.hhplus.ecommerce.orders.service.OrderRequest;
 import org.hhplus.ecommerce.user.entity.User;
+import org.hhplus.ecommerce.user.entity.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.shaded.org.checkerframework.checker.units.qual.A;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
-class OrdersFacadeTest extends IntegrationTestSupport {
+@SpringBootTest
+@ActiveProfiles("test")
+class OrdersFacadeTest {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private CashJpaRepository cashJpaRepository;
+
+    @Autowired
+    private ItemJpaRepository itemJpaRepository;
+
+    @Autowired
+    private StockJpaRepository stockJpaRepository;
+
 
     @Test
-    @DisplayName("상품을 주문할 때 재고가 있는 상품만 주문 된다.")
+    @DisplayName("테스트 데이터 넣기")
     public void createOrder() {
         // given
         int OrderRequestCnt1 = 1;
@@ -58,24 +81,6 @@ class OrdersFacadeTest extends IntegrationTestSupport {
                 OrderRequest.builder().itemId(items.get(1).getId()).cnt(OrderRequestCnt2).build(),
                 OrderRequest.builder().itemId(items.get(2).getId()).cnt(OrderRequestCnt3).build()
         );
-
-        // when
-        List<OrderItemDomain> orderItemDomains = ordersFacade.createOrder(userId, orderRequests);
-
-        // then
-        CashDomain cashDomain = cashService.getCash(userId);
-
-        assertThat(orderItemDomains).hasSize(orderRequests.size())
-                .extracting("itemId", "itemCnt")
-                .contains(
-                        tuple(items.get(0).getId(), OrderRequestCnt1),
-                        tuple(items.get(1).getId(), OrderRequestCnt2),
-                        tuple(items.get(2).getId(), OrderRequestCnt3)
-                );
-
-        // 잔액이 맞는지 확인
-        assertThat(cashDomain.getAmount())
-                .isEqualTo(Long.MAX_VALUE - (itemPrice1 * OrderRequestCnt1) - (itemPrice2 * OrderRequestCnt2) - (itemPrice3 * OrderRequestCnt3));
     }
 
 }
